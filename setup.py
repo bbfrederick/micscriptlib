@@ -87,10 +87,9 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         "numpy>=1.16",
-        "pyqtgraph",
         "nibabel",
         "scipy",
-        "pillow",
+        "matplotlib",
         "pandas",
     ],
     # List additional groups of dependencies here (e.g. development
