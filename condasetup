@@ -1,0 +1,14 @@
+#!/bin/bash
+
+conda create --name picachooser python=3.10
+conda activate picachooser
+mamba install \
+    pip \
+    scipy \
+    numpy \
+    pillow \
+    nibabel \
+    pandas \
+    pyqt \
+    pyqt5-sip \
+    "pyqtgraph<0.13"

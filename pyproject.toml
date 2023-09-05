@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "picachooser/_version.py"
+versionfile_build = "picachooser/_version.py"
+tag_prefix = ""
+parentdir_prefix = "picachooser-"
+
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+
+[tool.black]
+line-length = 99
+target-version = ['py39']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.github
+    | \.hg
+    | \.pytest_cache
+    | _build
+    | build
+    | dist
+  )/
+  | get_version.py
+  | versioneer.py
+  | picachooser/_version.py
+)
+'''

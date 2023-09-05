@@ -1,0 +1,6 @@
+numpy>=1.16
+pillow
+scipy
+pandas
+nibabel
+pyqtgraph

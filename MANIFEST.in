@@ -1,0 +1,5 @@
+recursive-include picachooser *.py
+recursive-include picachooser/scripts *
+include versioneer.py
+include picachooser/_version.py
+include picachooser/data/reference/Smith*
