@@ -340,6 +340,38 @@ def findboldfiles_fmriprep(
         return [val for sublist in retlist for val in sublist]
 
 
+def findaparcaseg_fmriprep(
+    inputlistfile=None,
+    debug=False,
+    bidsroot="/data/frederic/OASIS",
+):
+    if inputlistfile is None:
+        searchstring = os.path.join(
+            bidsroot,
+            "sub*",
+            "anat",
+            "*desc-aparcaseg_dseg.nii.gz",
+        )
+        if debug:
+            print("searchstring:", searchstring)
+        return glob.glob(searchstring)
+    else:
+        print("using subject list")
+        inputlist = readlist(inputlistfile)
+        print("subject list is ", inputlist)
+        retlist = []
+        for subject in inputlist:
+            searchstring = os.path.join(
+                bidsroot,
+                "sub-" + str(subject),
+                "anat",
+                "*desc-aparcaseg_dseg.nii.gz",
+            )
+            if debug:
+                print("searchstring:", searchstring)
+            retlist.append(glob.glob(searchstring))
+        return [val for sublist in retlist for val in sublist]
+
 def findboldfiles_BIDS_multisession(
     inputlistfile=None,
     debug=False,
