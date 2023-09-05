@@ -103,23 +103,23 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debu
             return None
 
 
-def mriconvert(inputfile, outputfile, cluster=False, fake=False, debug=False):
+def mriconvert(inputfile, outputfile, cluster=False, fake=False, waitfor=None, debug=False):
     convcmd = []
     convcmd += ["mri_convert"]
     convcmd += [inputfile]
     convcmd += [outputfile]
-    pidnum = runcmd(convcmd, cluster=cluster, fake=fake, debug=debug)
+    pidnum = runcmd(convcmd, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
     return pidnum
 
 
-def n4correct(inputfile, outputdir, cluster=False, fake=False, debug=False):
+def n4correct(inputfile, outputdir, cluster=False, fake=False, waitfor=None, debug=False):
     thename, theext = tide_io.niftisplitext(inputfile)
     n4cmd = []
     n4cmd += ["N4BiasFieldCorrection"]
     n4cmd += ["-d", "3"]
     n4cmd += ["-i", inputfile]
     n4cmd += ["-o", pjoin(outputdir, thename + "_n4" + theext)]
-    pidnum = runcmd(n4cmd, cluster=cluster, fake=fake, debug=debug)
+    pidnum = runcmd(n4cmd, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
     return pidnum
 
 
@@ -159,6 +159,7 @@ def atlasaverageapply(
     header=False,
     cluster=False,
     fake=False,
+    waitfor=None,
     debug=False,
 ):
     atlasavgcmd = []
@@ -174,7 +175,7 @@ def atlasaverageapply(
         atlasavgcmd += ["--datalabel", label]
     if regionlist is not None:
         atlasavgcmd += ["--regionlistfile", regionlist]
-    pidnum = runcmd(atlasavgcmd, cluster=cluster, fake=fake, debug=debug)
+    pidnum = runcmd(atlasavgcmd, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
     return pidnum
 
 
