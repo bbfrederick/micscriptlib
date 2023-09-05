@@ -78,7 +78,7 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, debug=False):
             jobname = thecmd[0].split("/")[-1]
             scriptfile, thescript = make_runscript(thecmd, jobname)
             if SYSTYPE == "sge":
-                sub_cmd = f"{QSUB} -cwd -q fmriprep.q -N {jobname} -w e -R y {filename}".split()
+                sub_cmd = f"{QSUB} -cwd -q fmriprep.q -N {jobname} -w e -R y {thecmd}".split()
             elif SYSTYPE == "slurm":
                 sub_cmd = f"{SBATCH} {scriptfile}".split()
             thereturn = subprocess.check_output(sub_cmd)
@@ -86,19 +86,6 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, debug=False):
         else:
             subprocess.call(thecmd)
             return None
-
-
-def batchruncmd(thecmd, readable=False, fake=False, debug=False):
-    jobname = thecmd[0].split("/")[-1]
-    scriptfile, thescript = make_runscript(thecmd, jobname)
-    if not fake:
-        if SYSTYPE == "sge":
-            sub_cmd = f"{QSUB} -cwd -q fmriprep.q -N {jobname} -w e -R y {filename}".split()
-        elif SYSTYPE == "slurm":
-            sub_cmd = f"{SBATCH} {scriptfile}".split()
-            subprocess.call(sub_cmd)
-    else:
-        print(thescript)
 
 
 def mriconvert(inputfile, outputfile, cluster=False, fake=False, debug=False):
@@ -176,7 +163,7 @@ def readlist(inputfilename):
     with open(inputfilename, "r") as thefile:
         lines = thefile.readlines()
         for line in lines:
-            inputlist.append(int(line))
+            inputlist.append(line)
     return inputlist
 
 
