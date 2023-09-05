@@ -278,7 +278,43 @@ def parsebidsname(thefile):
         pedir = None
     return absname, thefmrifile, thesubj, theses, therun, pedir
 
+def findboldfiles_fmriprep(
+    inputlistfile=None, debug=False, space="MNI152NLin6Asym", bidsroot="/data/frederic/OASIS",
+):
+    if inputlistfile is None:
+        searchstring = os.path.join(
+            bidsroot,
+            "derivatives",
+            "fmriprep",
+            "sub*",
+            "ses*",
+            "func",
+            f"*{space}*bold.nii.gz",
+        )
+        if debug:
+            print("searchstring:", searchstring)
+        return glob.glob(searchstring)
+    else:
+        print("using subject list")
+        inputlist = readlist(inputlistfile)
+        print("subject list is ", inputlist)
+        retlist = []
+        for subject in inputlist:
+            searchstring = os.path.join(
+                bidsroot,
+                "derivatives",
+                "fmriprep",
+                "sub-" + str(subject),
+                "ses*",
+                "func",
+                f"*{space}*bold.nii.gz",
+            )
+            if debug:
+                print("searchstring:", searchstring)
+            retlist.append(glob.glob(searchstring))
+        return [val for sublist in retlist for val in sublist]
 
+../derivatives/fmriprep/sub-OAS30006/ses-d2341/func
 def findboldfiles_BIDS_multisession(
     inputlistfile=None, debug=False, bidsroot="/data/frederic/OASIS",
 ):
