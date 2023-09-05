@@ -62,7 +62,7 @@ else:
     fslexists = False
 
 
-def runcmd(thecmd, cluster=False, readable=False, fake=False, debug=False):
+def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debug=False):
     if debug:
         print(thecmd)
     if fake:
@@ -77,10 +77,17 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, debug=False):
         if cluster:
             jobname = thecmd[0].split("/")[-1]
             scriptfile, thescript = make_runscript(thecmd, jobname)
+            waitstr = ""
             if SYSTYPE == "sge":
-                sub_cmd = f"{QSUB} -cwd -q fmriprep.q -N {jobname} -w e -R y {thecmd}".split()
+                if waitfor is not None:
+                    waitstr = f"-j {waitfor}"
+                sub_cmd = f"{QSUB} -cwd -q fmriprep.q -N {jobname} -w e -R y {waitstr} {thecmd}".split()
             elif SYSTYPE == "slurm":
-                sub_cmd = f"{SBATCH} {scriptfile}".split()
+                if waitfor is not None:
+                    waitstr = f"--dependency afterok:{waitfor}"
+                sub_cmd = f"{SBATCH} {waitstr} {scriptfile}".split()
+            if debug:
+                print("sub_cmd:", sub_cmd)
             thereturn = subprocess.check_output(sub_cmd)
             return str(thereturn)
         else:
@@ -114,6 +121,7 @@ def antsapply(
     cluster=False,
     fake=False,
     debug=False,
+    waitfor=None,
     interp=None,
 ):
     applyxfmcmd = []
@@ -127,7 +135,7 @@ def antsapply(
         applyxfmcmd += ["--interpolation", interp]
     for thetransform in transforms:
         applyxfmcmd += ["--transform", thetransform]
-    pidnum = runcmd(applyxfmcmd, cluster=cluster, fake=fake, debug=debug)
+    pidnum = runcmd(applyxfmcmd, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
     return pidnum
 
 def atlasaverageapply(
