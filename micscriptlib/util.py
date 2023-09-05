@@ -90,10 +90,12 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debu
                 print("sub_cmd:", sub_cmd)
             thereturn = subprocess.check_output(sub_cmd).split()
             thepid = (thereturn[-1]).strip()
+            thepidstr = str(thepid)
             if debug:
                 print("return value:", thereturn)
                 print("pid value:", thepid)
-            return str(thepid)
+                print("pidstr value:", thepidstr)
+            return str(thepidstr)
         else:
             subprocess.call(thecmd)
             return None
