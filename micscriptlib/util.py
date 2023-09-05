@@ -88,8 +88,8 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debu
                 sub_cmd = f"{SBATCH} {waitstr} {scriptfile}".split()
             if debug:
                 print("sub_cmd:", sub_cmd)
-            thereturn = str(subprocess.check_output(sub_cmd)).split()
-            thepid = (thereturn[3]).strip()
+            thereturn = (subprocess.check_output(sub_cmd)).strip().split()
+            thepid = thereturn[3]
             if debug:
                 print("return value:", thereturn)
                 print("pid value:", thepid)
