@@ -4,10 +4,10 @@ requires = ["setuptools", "wheel"]
 [tool.versioneer]
 VCS = "git"
 style = "pep440"
-versionfile_source = "picachooser/_version.py"
-versionfile_build = "picachooser/_version.py"
+versionfile_source = "micscriptlib/_version.py"
+versionfile_build = "micscriptlib/_version.py"
 tag_prefix = ""
-parentdir_prefix = "picachooser-"
+parentdir_prefix = "micscriptlib-"
 
 
 [tool.isort]
@@ -33,6 +33,6 @@ exclude = '''
   )/
   | get_version.py
   | versioneer.py
-  | picachooser/_version.py
+  | micscriptlib/_version.py
 )
 '''

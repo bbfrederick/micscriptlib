@@ -1,5 +1,4 @@
-recursive-include picachooser *.py
-recursive-include picachooser/scripts *
+recursive-include micscriptlib *.py
+recursive-include micscriptlib/scripts *
 include versioneer.py
-include picachooser/_version.py
-include picachooser/data/reference/Smith*
+include micscriptlib/_version.py

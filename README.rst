@@ -1,16 +1,9 @@
-PICAchooser (the package)
+micscriptlib (the package)
 =========================
 
-.. figure:: https://raw.githubusercontent.com/bbfrederick/picachooser/master/images/picalogo.png
-   :alt: Logo
+A set of routines to simplify some of the common processing script tasks around the MIC.
 
-A set of simple gui tools for scanning through MELODIC probabalistic ICA
-runs and quickly making decisions about which components to retain, and
-what relates to what. These tools each only do one thing, but they do them
-quickly and easily using only keyboard input. Current programs are
-PICAchooser, melodicomp, and grader.
-
-Full documentation is here: https://picachooser.readthedocs.io/en/latest/introduction.html
+Full documentation is here: https://micscriptlib.readthedocs.io/en/latest/introduction.html
 
 What's in here?
 ===============

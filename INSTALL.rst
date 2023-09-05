@@ -4,7 +4,7 @@ Installation
 Required dependencies
 ---------------------
 
-PICAchooser requires some external libraries to be installed first:
+micscriptlib requires some external libraries to be installed first:
 
 -  Python 3.x
 -  numpy>=1.16
@@ -20,11 +20,11 @@ Installing from pypi (NEW!)
 ---------------------------
 
 I've finally gotten pypi deployment working, so the new easiest way to
-install picachooser is to simply type:
+install micscriptlib is to simply type:
 
 ::
 
-    pip install picachooser
+    pip install micscriptlib
 
 
 That's it, I think.
@@ -37,7 +37,7 @@ The other simple way to get this all done is to use Anaconda python
 from Continuum Analytics. It’s a free, curated scientific Python
 distribution that is easy to maintain and takes a lot of headaches out
 of maintaining a distribution. It also already comes with almost all of the
-dependancies for PICAchooser installed by default. You can get it here:
+dependancies for micscriptlib installed by default. You can get it here:
 https://www.continuum.io. You should download the most recent Python 3 version.
 
 After installing Anaconda python, install the remaining dependency
@@ -59,7 +59,7 @@ Then install the additional dependencies:
 
 Done.
 
-Installing PICAchooser
+Installing micscriptlib
 ----------------------
 
 Once you have installed the prerequisites, cd into the package
@@ -76,7 +76,7 @@ them from the command line then (after rehashing).
 Updating
 --------
 
-If you’ve previously installed PICAchooser and want to update, cd into the
+If you’ve previously installed micscriptlib and want to update, cd into the
 package directory and do a git pull first:
 
 ::
@@ -87,11 +87,11 @@ package directory and do a git pull first:
 
 Docker installation
 ===================
-There is a Docker container with a full PICAchooser installation.  To use this, first make
+There is a Docker container with a full micscriptlib installation.  To use this, first make
 sure you have docker installed and properly configured, then run the following:
 ::
 
-    docker pull fredericklab/picachooser:VERSIONNUMBER
+    docker pull fredericklab/micscriptlib:VERSIONNUMBER
 
 
 This it will download the docker container from dockerhub.
@@ -102,13 +102,13 @@ with container you want (currently the newest version is 1.0.0rc2).
 If you like to live on the edge, just use:
 ::
 
-    docker pull fredericklab/picachooser:latest
+    docker pull fredericklab/micscriptlib:latest
 
 
 This will use the most recent version on dockerhub.  
 
-Now that the file is downloaded, you can run any picachooser command in the Docker container.  For example, to run 
-PICAchooser itself, you would use the following command (you can do this all in one step - it will just integrate the
+Now that the file is downloaded, you can run any micscriptlib command in the Docker container.  For example, to run 
+micscriptlib itself, you would use the following command (you can do this all in one step - it will just integrate the
 first pull into the run time if the version you request hasn't already been downloaded).
 
 Docker runs completely in it's own selfcontained environment.  If you want to be able to interact with disks outside of
@@ -146,15 +146,15 @@ Then you should be good to go, with the following command:
         --volume=INPUTDIRECTORY:/data_in,OUTPUTDIRECTORY:/data_out \
         -it \
         -e DISPLAY=MYIPADDRESS:0 \
-        -u picachooser \
-        fredericklab/picachooser:VERSIONNUMBER \
-            PICAchooser \
+        -u micscriptlib \
+        fredericklab/micscriptlib:VERSIONNUMBER \
+            micscriptlib \
                 RUNMODE \
                 --featdir /data_in/FEATDIRECTORY \
                 --melodicdir /data_in/MELODICDIRECTORY \
                 [otheroptions]
 
-You can replace the PICAchooser blah blah blah command with any other program in the package (currently only "grader", which classifies timecourses) - after the fredericklab/picachooser:latest, 
+You can replace the micscriptlib blah blah blah command with any other program in the package (currently only "grader", which classifies timecourses) - after the fredericklab/micscriptlib:latest, 
 just specify the command and arguments as you usually would.
 
 
@@ -166,7 +166,7 @@ that runs entirely in user space, so the amount of mischief you can get up to is
 containers can be created from Docker containers as follows (stealing from the fMRIprep documentation):
 ::
 
-    singularity build /my_images/picachooser-VERSIONNUMBER.simg docker://fredericklab/picachooser:VERSIONNUMBER
+    singularity build /my_images/micscriptlib-VERSIONNUMBER.simg docker://fredericklab/micscriptlib:VERSIONNUMBER
 
 
 Running the container is similar to Docker.  The "-B" option is used to bind filesystems to mountpoints in the container. 
@@ -174,8 +174,8 @@ Running the container is similar to Docker.  The "-B" option is used to bind fil
     singularity run \
         --cleanenv \
         -B INPUTDIRECTORY:/data_in,OUTPUTDIRECTORY:/data_out \
-        picachooser-VERSIONNUMBER.simg \
-            PICAchooser \
+        micscriptlib-VERSIONNUMBER.simg \
+            micscriptlib \
                 RUNMODE \
                 --featdir /data_in/FEATDIRECTORY \
                 --melodicdir /data_in/MELODICDIRECTORY \

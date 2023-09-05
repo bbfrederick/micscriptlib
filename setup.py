@@ -27,30 +27,16 @@ with open(path.join(here, "VERSION"), "w", encoding="utf-8") as f:
 
 
 modules_list = [
-    "picachooser/graderTemplate",
-    "picachooser/picachooserTemplate",
-    "picachooser/picachooser_imonlyTemplate",
-    "picachooser/picachooser_altimonlyTemplate",
-    "picachooser/melodicompTemplate",
-    "picachooser/picachooserTemplate",
-    "picachooser/picachooseraltTemplate",
-    "picachooser/io",
-    "picachooser/fit",
-    "picachooser/stats",
-    "picachooser/colormaps",
-    "picachooser/LightboxItem",
-    "picachooser/_version",
+    "micscriptlib/util",
+    "micscriptlib/util2",
 ]
 
 script_list = [
-    "picachooser/scripts/PICAchooser_dispatcher",
-    "picachooser/scripts/grader",
-    "picachooser/scripts/melodicomp",
-    "picachooser/scripts/PICAchooser",
+    "micscriptlib/scripts/splitrapidtide,
 ]
 
 setup(
-    name="picachooser",
+    name="micscriptlib",
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
@@ -59,7 +45,7 @@ setup(
     description="Lightweight GUI for sorting, classifying, and matching MELODIC ICA components.",
     long_description=long_description,
     # The project's main homepage.
-    url="https://github.com/bbfrederick/picachooser",
+    url="https://github.com/bbfrederick/micscriptlib",
     # Author details
     author="Blaise Frederick",
     author_email="bbfrederick@mclean.harvard.edu",

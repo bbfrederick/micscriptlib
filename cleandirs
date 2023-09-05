@@ -6,7 +6,7 @@ pipresult="True"
 
 while [ -n "$pipresult" ]
 do
-    pipresult=`pip uninstall -y picachooser | grep "Found existing"`
+    pipresult=`pip uninstall -y micscriptlib | grep "Found existing"`
     if [[ -z $pipresult ]]
     then
         echo No installations found - quitting.

@@ -6,7 +6,7 @@ set -ex
 # docker hub username
 USERNAME=fredericklab
 # image name
-IMAGE=picachooser
+IMAGE=micscriptlib
 
 # ensure we're up to date
 git pull
