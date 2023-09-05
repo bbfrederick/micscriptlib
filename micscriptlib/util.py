@@ -100,7 +100,6 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debu
             subprocess.call(thecmd)
             return None
 
-
 def mriconvert(inputfile, outputfile, cluster=False, fake=False, debug=False):
     convcmd = []
     convcmd += ["mri_convert"]
