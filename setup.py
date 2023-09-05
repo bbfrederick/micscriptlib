@@ -32,7 +32,7 @@ modules_list = [
 ]
 
 script_list = [
-    "micscriptlib/scripts/splitrapidtide,
+    "micscriptlib/scripts/splitrapidtide",
 ]
 
 setup(
