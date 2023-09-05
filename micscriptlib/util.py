@@ -81,7 +81,9 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debu
             if SYSTYPE == "sge":
                 if waitfor is not None:
                     waitstr = f"-j {waitfor}"
-                sub_cmd = f"{QSUB} -cwd -q fmriprep.q -N {jobname} -w e -R y {waitstr} {thecmd}".split()
+                sub_cmd = (
+                    f"{QSUB} -cwd -q fmriprep.q -N {jobname} -w e -R y {waitstr} {thecmd}".split()
+                )
             elif SYSTYPE == "slurm":
                 if waitfor is not None:
                     waitstr = f"--dependency afterok:{waitfor}"
@@ -100,6 +102,7 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debu
             subprocess.call(thecmd)
             return None
 
+
 def mriconvert(inputfile, outputfile, cluster=False, fake=False, debug=False):
     convcmd = []
     convcmd += ["mri_convert"]
@@ -107,6 +110,7 @@ def mriconvert(inputfile, outputfile, cluster=False, fake=False, debug=False):
     convcmd += [outputfile]
     pidnum = runcmd(convcmd, cluster=cluster, fake=fake, debug=debug)
     return pidnum
+
 
 def n4correct(inputfile, outputdir, cluster=False, fake=False, debug=False):
     thename, theext = tide_io.niftisplitext(inputfile)
@@ -117,6 +121,7 @@ def n4correct(inputfile, outputdir, cluster=False, fake=False, debug=False):
     n4cmd += ["-o", pjoin(outputdir, thename + "_n4" + theext)]
     pidnum = runcmd(n4cmd, cluster=cluster, fake=fake, debug=debug)
     return pidnum
+
 
 def antsapply(
     inputname,
@@ -142,6 +147,7 @@ def antsapply(
         applyxfmcmd += ["--transform", thetransform]
     pidnum = runcmd(applyxfmcmd, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
     return pidnum
+
 
 def atlasaverageapply(
     inputfile,
@@ -170,6 +176,7 @@ def atlasaverageapply(
         atlasavgcmd += ["--regionlistfile", regionlist]
     pidnum = runcmd(atlasavgcmd, cluster=cluster, fake=fake, debug=debug)
     return pidnum
+
 
 def readlist(inputfilename):
     inputlist = []
@@ -382,6 +389,7 @@ def findaparcaseg_fmriprep(
                 print("searchstring:", searchstring)
             retlist.append(glob.glob(searchstring))
         return [val for sublist in retlist for val in sublist]
+
 
 def findboldfiles_BIDS_multisession(
     inputlistfile=None,
