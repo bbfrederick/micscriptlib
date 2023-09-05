@@ -4,15 +4,11 @@
 #       $Date: 2015/03/06 14:12:29 $
 #       $Id: preprocess_spo2.py,v 1.1 2015/03/06 14:12:29 frederic Exp $
 #
-from __future__ import print_function
-
 import argparse
 import glob
-import operator
 import os
 import subprocess
 import sys
-import time
 
 QSUB = "/cm/shared/apps/sge/2011.11p1/bin/linux-x64/qsub"
 SBATCH = "/cm/shared/apps/slurm/current/bin/sbatch"
@@ -25,7 +21,7 @@ else:
     SUBMITTER = SBATCH
     SINGULARITY = "/cm/local/apps/apptainer/current/bin/singularity"
 
-def make_runscript(thecommand, ncpus=8):
+def make_runscript(thecommand, ncpus=8, timelimit="0:30:00"):
     """
     Create a temporary script file we can submit to qsub.
     """
@@ -38,7 +34,7 @@ def make_runscript(thecommand, ncpus=8):
     pre += ["#SBATCH --job-name=rapidtide"]
     pre += ["#SBATCH --output=rapidtide.%j.out"]
     pre += ["#SBATCH --error=rapidtide.%j.err"]
-    pre += ["#SBATCH --time=0:30:00"]
+    pre += [f"#SBATCH --time={timelimit}"]
     pre += [f"#SBATCH --cpus-per-task={ncpus}"]
     pre += ["#SBATCH --qos=normal"]
     pre += ["#SBATCH --mem=16G"]
@@ -88,201 +84,6 @@ def makeadir(pathname):
             print("ERROR: ", pathname, " does not exist, and could not create it")
             return False
     return True
-
-
-def parseconnectomename(thefile, volumeproc=True):
-    absname = os.path.abspath(thefile)
-    therundir, thefmrifile = os.path.split(absname)
-    theresultsdir, therun = os.path.split(therundir)
-    if volumeproc:
-        theMNINonLinDir, dummy = os.path.split(theresultsdir)
-        thesubjdir, dummy = os.path.split(theMNINonLinDir)
-        dummy, thesubj = os.path.split(thesubjdir)
-        pedir = therun[-2:]
-    else:
-        splitname = thefmrifile.split("_")
-        thesubj = therun
-        therun = "_".join(splitname[0:2])
-        pedir = splitname[2]
-    return absname, thesubj, therun, pedir
-
-
-def parsecolename(thefile, volumeproc=True):
-    absname = os.path.abspath(thefile)
-    therundir, thefmrifile = os.path.split(absname)
-    if volumeproc:
-        theparts = thefmrifile.split("_")
-        thesubj = theparts[0]
-        therun = theparts[3]
-        pedir = theparts[-1][0:2]
-    else:
-        splitname = thefmrifile.split("_")
-        thesubj = therun
-        therun = "_".join(splitname[0:2])
-        pedir = splitname[2]
-    return absname, thesubj, therun, pedir
-
-
-def findboldfiles_HCP(
-    theroot, thetype, volumeproc, usefixforglm, inputlistfile=None, debug=False
-):
-    # special options depending on whether using volume or grayordinate files
-    if inputlistfile is None:
-        if volumeproc:
-            searchstring = os.path.join(
-                connectomeroot,
-                "*",
-                "preproc",
-                "*",
-                "MNINonLinear",
-                "Results",
-                thetype + "_[LR][LR]",
-                thetype + "_[LR][LR].nii.gz",
-            )
-        else:
-            searchstring = os.path.join(
-                outputroot, "*", thetype + "_[LR][LR]_grayordinate.nii.gz"
-            )
-        if debug:
-            print("searchstring:", searchstring)
-        return glob.glob(searchstring)
-    else:
-        print("using subject list")
-        inputlist = readlist(inputlistfile)
-        print("subject list is ", inputlist)
-        retlist = []
-        for subject in inputlist:
-            if volumeproc:
-                searchstring = os.path.join(
-                    connectomeroot,
-                    str(subject),
-                    "preproc",
-                    "*",
-                    "MNINonLinear",
-                    "Results",
-                    thetype + "_[LR][LR]",
-                    thetype + "_[LR][LR].nii.gz",
-                )
-            else:
-                searchstring = os.path.join(
-                    outputroot, str(subject), thetype + "_[LR][LR]_grayordinate.nii.gz"
-                )
-            if debug:
-                print("searchstring:", searchstring)
-            retlist.append(glob.glob(searchstring))
-        return [val for sublist in retlist for val in sublist]
-
-
-def parsebidsname(thefile):
-    absname = os.path.abspath(thefile)
-    therundir, thefmrifile = os.path.split(absname)
-    theparts = thefmrifile.split("_")
-    nameparts = {}
-    for thepart in theparts:
-        splitparts = thepart.split("-")
-        if len(splitparts) == 2:
-            nameparts[splitparts[0]] = splitparts[1]
-    try:
-        thesubj = nameparts["sub"]
-    except KeyError:
-        print("no subject key!")
-        sys.exit()
-    try:
-        theses = nameparts["ses"]
-    except KeyError:
-        theses = None
-    try:
-        therun = nameparts["run"]
-    except KeyError:
-        therun = None
-    try:
-        pedir = nameparts["dir"]
-    except KeyError:
-        pedir = None
-    return absname, thefmrifile, thesubj, theses, therun, pedir
-
-
-def findboldfiles_BIDS_multisession(
-    inputlistfile=None, debug=False, bidsroot="/data/frederic/OASIS",
-):
-    if inputlistfile is None:
-        searchstring = os.path.join(
-            bidsroot,
-            "sub*",
-            "ses*",
-            "func",
-            "*bold.nii.gz",
-        )
-        if debug:
-            print("searchstring:", searchstring)
-        return glob.glob(searchstring)
-    else:
-        print("using subject list")
-        inputlist = readlist(inputlistfile)
-        print("subject list is ", inputlist)
-        retlist = []
-        for subject in inputlist:
-            searchstring = os.path.join(
-                bidsroot,
-                "sub-" + str(subject),
-                "ses*",
-                "func",
-                "*bold.nii.gz",
-            )
-            if debug:
-                print("searchstring:", searchstring)
-            retlist.append(glob.glob(searchstring))
-        return [val for sublist in retlist for val in sublist]
-
-
-def findboldfiles_cole(
-    theroot, thetype, volumeproc, usefixforglm, inputlistfile=None, debug=False
-):
-    # special options depending on whether using volume or grayordinate files
-    if inputlistfile is None:
-        if volumeproc:
-            searchstring = os.path.join(
-                connectomeroot,
-                "*",
-                "*_Clean_" + thetype + "_[LR][LR].nii.gz",
-            )
-        else:
-            searchstring = os.path.join(
-                outputroot, "*", thetype + "_[LR][LR]_grayordinate.nii.gz"
-            )
-        if debug:
-            print("searchstring:", searchstring)
-        return glob.glob(searchstring)
-    else:
-        print("using subject list")
-        inputlist = readlist(inputlistfile)
-        print("subject list is ", inputlist)
-        retlist = []
-        for subject in inputlist:
-            if volumeproc:
-                searchstring = os.path.join(
-                    connectomeroot,
-                    str(subject),
-                    "preproc",
-                    "*",
-                    "MNINonLinear",
-                    "Results",
-                    thetype + "_[LR][LR]",
-                    thetype + "_[LR][LR].nii.gz",
-                )
-                searchstring = os.path.join(
-                    connectomeroot,
-                    str(subject),
-                    "*_Clean_" + thetype + "_[LR][LR].nii.gz",
-                )
-            else:
-                searchstring = os.path.join(
-                    outputroot, str(subject), thetype + "_[LR][LR]_grayordinate.nii.gz"
-                )
-            if debug:
-                print("searchstring:", searchstring)
-            retlist.append(glob.glob(searchstring))
-        return [val for sublist in retlist for val in sublist]
 
 
 def _get_parser():

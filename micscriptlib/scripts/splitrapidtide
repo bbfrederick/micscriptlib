@@ -7,12 +7,10 @@
 from __future__ import print_function
 
 import argparse
-import glob
-import operator
 import os
 import subprocess
 import sys
-import time
+import micscriptlib.util as micutil
 
 QSUB = "/cm/shared/apps/sge/2011.11p1/bin/linux-x64/qsub"
 SBATCH = "/cm/shared/apps/slurm/current/bin/sbatch"
@@ -24,33 +22,6 @@ else:
     SYSTYPE = "slurm"
     SUBMITTER = SBATCH
     SINGULARITY = "/cm/local/apps/apptainer/current/bin/singularity"
-
-def make_runscript(thecommand, ncpus=8):
-    """
-    Create a temporary script file we can submit to qsub.
-    """
-
-    import tempfile
-
-    pre = ["#!/bin/bash"]
-
-    #pre += ["#SBATCH -p short"]
-    pre += ["#SBATCH --job-name=rapidtide"]
-    pre += ["#SBATCH --output=rapidtide.%j.out"]
-    pre += ["#SBATCH --error=rapidtide.%j.err"]
-    pre += ["#SBATCH --time=0:30:00"]
-    pre += [f"#SBATCH --cpus-per-task={ncpus}"]
-    pre += ["#SBATCH --qos=normal"]
-    pre += ["#SBATCH --mem=16G"]
-    pre += ["#SBATCH --mail-type=FAIL # notifications for job fail"]
-    pre += ["#SBATCH --mail-user=bbfrederick@mclean.harvard.edu"]
-
-    script = "\n".join(pre) + "\n" + " \\\n    ".join(thecommand) + "\n"
-
-    _, filename = tempfile.mkstemp()
-    with open(filename, "w") as fp:
-        fp.write(script)
-    return filename, script
 
 
 # file locations
@@ -65,162 +36,6 @@ else:
     theoutputdir = os.path.join(outputroot, "splitanalysis", "output")
 
 rapidtidecmd = "/cm/shared/anaconda3/envs/mic/bin/rapidtide"
-
-
-def readlist(inputfilename):
-    inputlist = []
-    with open(inputfilename, "r") as thefile:
-        lines = thefile.readlines()
-        for line in lines:
-            inputlist.append(int(line))
-    return inputlist
-
-
-def makeadir(pathname):
-    try:
-        os.makedirs(pathname)
-    except OSError:
-        if os.path.exists(pathname):
-            # We are nearly safe
-            return True
-        else:
-            # There was an error on creation, so make sure we know about it
-            print("ERROR: ", pathname, " does not exist, and could not create it")
-            return False
-    return True
-
-
-def parseconnectomename(thefile, volumeproc=True):
-    absname = os.path.abspath(thefile)
-    therundir, thefmrifile = os.path.split(absname)
-    theresultsdir, therun = os.path.split(therundir)
-    if volumeproc:
-        theMNINonLinDir, dummy = os.path.split(theresultsdir)
-        thesubjdir, dummy = os.path.split(theMNINonLinDir)
-        dummy, thesubj = os.path.split(thesubjdir)
-        pedir = therun[-2:]
-    else:
-        splitname = thefmrifile.split("_")
-        thesubj = therun
-        therun = "_".join(splitname[0:2])
-        pedir = splitname[2]
-    return absname, thesubj, therun, pedir
-
-
-def parsecolename(thefile, volumeproc=True):
-    absname = os.path.abspath(thefile)
-    therundir, thefmrifile = os.path.split(absname)
-    if volumeproc:
-        theparts = thefmrifile.split("_")
-        thesubj = theparts[0]
-        therun = theparts[3]
-        pedir = theparts[-1][0:2]
-    else:
-        splitname = thefmrifile.split("_")
-        thesubj = therun
-        therun = "_".join(splitname[0:2])
-        pedir = splitname[2]
-    return absname, thesubj, therun, pedir
-
-
-def findboldfiles_HCP(
-    theroot, thetype, volumeproc, usefixforglm, inputlistfile=None, debug=False
-):
-    # special options depending on whether using volume or grayordinate files
-    if inputlistfile is None:
-        if volumeproc:
-            searchstring = os.path.join(
-                connectomeroot,
-                "*",
-                "preproc",
-                "*",
-                "MNINonLinear",
-                "Results",
-                thetype + "_[LR][LR]",
-                thetype + "_[LR][LR].nii.gz",
-            )
-        else:
-            searchstring = os.path.join(
-                outputroot, "*", thetype + "_[LR][LR]_grayordinate.nii.gz"
-            )
-        if debug:
-            print("searchstring:", searchstring)
-        return glob.glob(searchstring)
-    else:
-        print("using subject list")
-        inputlist = readlist(inputlistfile)
-        print("subject list is ", inputlist)
-        retlist = []
-        for subject in inputlist:
-            if volumeproc:
-                searchstring = os.path.join(
-                    connectomeroot,
-                    str(subject),
-                    "preproc",
-                    "*",
-                    "MNINonLinear",
-                    "Results",
-                    thetype + "_[LR][LR]",
-                    thetype + "_[LR][LR].nii.gz",
-                )
-            else:
-                searchstring = os.path.join(
-                    outputroot, str(subject), thetype + "_[LR][LR]_grayordinate.nii.gz"
-                )
-            if debug:
-                print("searchstring:", searchstring)
-            retlist.append(glob.glob(searchstring))
-        return [val for sublist in retlist for val in sublist]
-
-
-def findboldfiles_cole(
-    theroot, thetype, volumeproc, usefixforglm, inputlistfile=None, debug=False
-):
-    # special options depending on whether using volume or grayordinate files
-    if inputlistfile is None:
-        if volumeproc:
-            searchstring = os.path.join(
-                connectomeroot,
-                "*",
-                "*_Clean_" + thetype + "_[LR][LR].nii.gz",
-            )
-        else:
-            searchstring = os.path.join(
-                outputroot, "*", thetype + "_[LR][LR]_grayordinate.nii.gz"
-            )
-        if debug:
-            print("searchstring:", searchstring)
-        return glob.glob(searchstring)
-    else:
-        print("using subject list")
-        inputlist = readlist(inputlistfile)
-        print("subject list is ", inputlist)
-        retlist = []
-        for subject in inputlist:
-            if volumeproc:
-                searchstring = os.path.join(
-                    connectomeroot,
-                    str(subject),
-                    "preproc",
-                    "*",
-                    "MNINonLinear",
-                    "Results",
-                    thetype + "_[LR][LR]",
-                    thetype + "_[LR][LR].nii.gz",
-                )
-                searchstring = os.path.join(
-                    connectomeroot,
-                    str(subject),
-                    "*_Clean_" + thetype + "_[LR][LR].nii.gz",
-                )
-            else:
-                searchstring = os.path.join(
-                    outputroot, str(subject), thetype + "_[LR][LR]_grayordinate.nii.gz"
-                )
-            if debug:
-                print("searchstring:", searchstring)
-            retlist.append(glob.glob(searchstring))
-        return [val for sublist in retlist for val in sublist]
 
 
 def _get_parser():
@@ -391,7 +206,7 @@ def main():
     for thetype in thetypes:
         # special options depending on whether using volume or grayordinate files
         if sourcetype == "cole":
-            theboldfiles = findboldfiles_cole(
+            theboldfiles = micutil.findboldfiles_cole(
                 connectomeroot,
                 thetype,
                 args.volumeproc,
@@ -400,7 +215,7 @@ def main():
                 debug=args.debug,
             )
         else:
-            theboldfiles = findboldfiles_HCP(
+            theboldfiles = micutil.findboldfiles_HCP(
                 connectomeroot,
                 thetype,
                 args.volumeproc,
@@ -409,24 +224,24 @@ def main():
                 debug=args.debug,
             )
 
-        if not makeadir(theoutputdir):
+        if not micutil.makeadir(theoutputdir):
             print("cannot initialize output root directory, exiting")
             sys.exit(1)
 
         for thefile in theboldfiles:
             if sourcetype == "cole":
-                absname, thesubj, therun, pedir = parsecolename(
+                absname, thesubj, therun, pedir = micutil.parsecolename(
                     thefile, volumeproc=args.volumeproc
                 )
                 print(f"{absname=}, {thesubj=}, {therun=}, {pedir=}")
             else:
-                absname, thesubj, therun, pedir = parseconnectomename(
+                absname, thesubj, therun, pedir = micutil.parseconnectomename(
                     thefile, volumeproc=args.volumeproc
                 )
             absname = os.path.abspath(thefile)
             therundir, thefmrifile = os.path.split(absname)
             theresultsdir, therun = os.path.split(therundir)
-            if not makeadir(os.path.join(theoutputdir, thesubj)):
+            if not micutil.makeadir(os.path.join(theoutputdir, thesubj)):
                 print("cannot initialize output subject directory, exiting")
                 sys.exit(1)
 
@@ -535,7 +350,7 @@ def main():
                     dothis = True
     
                 thiscommand = thecommand + [f"--timerange {inputrange}", outputname]
-                scriptfile, thescript = make_runscript(thiscommand)
+                scriptfile, thescript = micutil.make_runscript(thiscommand)
                 if dothis:
                     if args.doforreal:
                         if SYSTYPE == "sge":
