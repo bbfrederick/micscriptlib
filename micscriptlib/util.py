@@ -89,7 +89,7 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debu
             if debug:
                 print("sub_cmd:", sub_cmd)
             thereturn = subprocess.check_output(sub_cmd).split()
-            thepid = (thereturn.split())[-1]
+            thepid = (thereturn[-1]).strip()
             if debug:
                 print("return value:", thereturn)
                 print("pid value:", thepid)
