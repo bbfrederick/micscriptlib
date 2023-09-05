@@ -171,7 +171,7 @@ def readlist(inputfilename):
     with open(inputfilename, "r") as thefile:
         lines = thefile.readlines()
         for line in lines:
-            inputlist.append(line)
+            inputlist.append(line.strip())
     return inputlist
 
 
