@@ -353,6 +353,8 @@ def findaparcaseg_fmriprep(
     if inputlistfile is None:
         searchstring = os.path.join(
             bidsroot,
+            "derivatives",
+            "fmriprep",
             "sub*",
             "anat",
             "*desc-aparcaseg_dseg.nii.gz",
@@ -368,6 +370,8 @@ def findaparcaseg_fmriprep(
         for subject in inputlist:
             searchstring = os.path.join(
                 bidsroot,
+                "derivatives",
+                "fmriprep",
                 "sub-" + str(subject),
                 "anat",
                 "*desc-aparcaseg_dseg.nii.gz",
