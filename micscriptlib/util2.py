@@ -21,6 +21,7 @@ else:
     SUBMITTER = SBATCH
     SINGULARITY = "/cm/local/apps/apptainer/current/bin/singularity"
 
+
 def make_runscript(thecommand, ncpus=8, timelimit="0:30:00"):
     """
     Create a temporary script file we can submit to qsub.
@@ -30,7 +31,7 @@ def make_runscript(thecommand, ncpus=8, timelimit="0:30:00"):
 
     pre = ["#!/bin/bash"]
 
-    #pre += ["#SBATCH -p short"]
+    # pre += ["#SBATCH -p short"]
     pre += ["#SBATCH --job-name=rapidtide"]
     pre += ["#SBATCH --output=rapidtide.%j.out"]
     pre += ["#SBATCH --error=rapidtide.%j.err"]
@@ -307,7 +308,27 @@ def main():
                 regressortouse = pedir
             if args.volumeproc:
                 if args.isswapped:
-                    regressoropts = ["--regressor " + os.path.join(
+                    regressoropts = [
+                        "--regressor "
+                        + os.path.join(
+                            theoutputdir,
+                            thesubj,
+                            thesubj
+                            + "_"
+                            + thetype
+                            + "_noswap_"
+                            + regressortouse
+                            + outputnamesuffix
+                            + extrasuffix
+                            + "_reference_fmrires_pass3.txt",
+                        )
+                    ]
+                else:
+                    regressoropts = ["--passes 3"]
+            else:
+                regressoropts = [
+                    "--regressor "
+                    + os.path.join(
                         theoutputdir,
                         thesubj,
                         thesubj
@@ -318,32 +339,12 @@ def main():
                         + outputnamesuffix
                         + extrasuffix
                         + "_reference_fmrires_pass3.txt",
-                    )]
-                else:
-                    regressoropts = ["--passes 3"]
-            else:
-                regressoropts = ["--regressor " + os.path.join(
-                    theoutputdir,
-                    thesubj,
-                    thesubj
-                    + "_"
-                    + thetype
-                    + "_noswap_"
-                    + regressortouse
-                    + outputnamesuffix
-                    + extrasuffix
-                    + "_reference_fmrires_pass3.txt",
-                )]
+                    )
+                ]
 
             outroot = os.path.join(
                 thesubj,
-                thesubj
-                + "_"
-                + thetype
-                + swapname
-                + pedir
-                + outputnamesuffix
-                + extrasuffix,
+                thesubj + "_" + thetype + swapname + pedir + outputnamesuffix + extrasuffix,
             )
             thecommand = []
             fmrifile = absname
@@ -358,13 +359,13 @@ def main():
                 thecommand.append("--glmsourcefile=" + glmname)
 
             # put in the rapidtide options
-            #for theopt in rapidtideopts:
-                #splitopt = theopt.split()
-                #thecommand.extend(splitopt)
+            # for theopt in rapidtideopts:
+            # splitopt = theopt.split()
+            # thecommand.extend(splitopt)
             thecommand += rapidtideopts
 
             # put in the regressor options
-            #thecommand.extend(regressoropts.split())
+            # thecommand.extend(regressoropts.split())
             thecommand += regressoropts
 
             # oversample to ~1.0s TR
@@ -379,7 +380,9 @@ def main():
             endpoint = 1199
             numpoints = endpoint - args.startpoint + 1
             pointspersection = numpoints // args.numsections
-            print(f"dividing timecourse into {args.numsections} sections of {pointspersection} points")
+            print(
+                f"dividing timecourse into {args.numsections} sections of {pointspersection} points"
+            )
             for section in range(args.numsections):
                 sectionname = f"{section + 1}-of-{args.numsections}"
                 secstart = args.startpoint + section * pointspersection
@@ -396,7 +399,7 @@ def main():
                         dothis = True
                 else:
                     dothis = True
-    
+
                 thiscommand = thecommand + [f"--timerange {inputrange}", outputname]
                 scriptfile, thescript = make_runscript(thiscommand)
                 if dothis:

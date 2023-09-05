@@ -22,6 +22,7 @@ else:
     SUBMITTER = SBATCH
     SINGULARITY = "/cm/local/apps/apptainer/current/bin/singularity"
 
+
 def make_runscript(thecommand, jobname=rapidtide, ncpus=8, timelimit="0:30:00", mem="16G"):
     """
     Create a temporary script file we can submit to qsub.
@@ -31,7 +32,7 @@ def make_runscript(thecommand, jobname=rapidtide, ncpus=8, timelimit="0:30:00", 
 
     pre = ["#!/bin/bash"]
 
-    #pre += ["#SBATCH -p short"]
+    # pre += ["#SBATCH -p short"]
     pre += [f"#SBATCH --job-name={jobname}"]
     pre += [f"#SBATCH --output={jobname}.%j.out"]
     pre += [f"#SBATCH --error={jobname}.%j.err"]
@@ -60,6 +61,7 @@ if fsldir is not None:
 else:
     fslexists = False
 
+
 def runcmd(thecmd, cluster=False, readable=False, fake=False, debug=False):
     if debug:
         print(thecmd)
@@ -67,13 +69,13 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, debug=False):
         if readable:
             print(thecmd[0])
             for thearg in thecmd[1:]:
-                print("\t",thearg)
+                print("\t", thearg)
         else:
             print(" ".join(thecmd))
         print()
     else:
         if cluster:
-            jobname = thecmd[0].split('/')[-1]
+            jobname = thecmd[0].split("/")[-1]
             scriptfile, thescript = make_runscript(thecmd, jobname)
             if SYSTYPE == "sge":
                 sub_cmd = f"{QSUB} -cwd -q fmriprep.q -N {jobname} -w e -R y {filename}".split()
@@ -83,8 +85,9 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, debug=False):
         else:
             subprocess.call(thecmd)
 
+
 def batchruncmd(thecmd, readable=False, fake=False, debug=False):
-    jobname = thecmd[0].split('/')[-1]
+    jobname = thecmd[0].split("/")[-1]
     scriptfile, thescript = make_runscript(thecmd, jobname)
     if not fake:
         if SYSTYPE == "sge":
@@ -114,7 +117,16 @@ def n4correct(inputfile, outputdir, cluster=False, fake=False, debug=False):
     runcmd(n4cmd, cluster=cluster, fake=fake, debug=debug)
 
 
-def antsapply(inputname, targetname, outputroot, transforms, cluster=False, fake=False, debug=False, interp=None):
+def antsapply(
+    inputname,
+    targetname,
+    outputroot,
+    transforms,
+    cluster=False,
+    fake=False,
+    debug=False,
+    interp=None,
+):
     applyxfmcmd = []
     applyxfmcmd += ["/cm/shared/apps/ants-2.4.3/bin/antsApplyTransforms"]
     applyxfmcmd += ["--default-value", "0"]
@@ -128,7 +140,19 @@ def antsapply(inputname, targetname, outputroot, transforms, cluster=False, fake
         applyxfmcmd += ["--transform", thetransform]
     runcmd(applyxfmcmd, cluster=cluster, fake=fake, debug=debug)
 
-def atlasaverageapply(inputfile, templatefile, outputfileroot, regionlist=None, label=None, nozero=False, header=False, cluster=False, fake=False, debug=False):
+
+def atlasaverageapply(
+    inputfile,
+    templatefile,
+    outputfileroot,
+    regionlist=None,
+    label=None,
+    nozero=False,
+    header=False,
+    cluster=False,
+    fake=False,
+    debug=False,
+):
     atlasavgcmd = []
     atlasavgcmd += [atlasaveragecommand]
     atlasavgcmd += [inputfile]
@@ -167,6 +191,7 @@ def makeadir(pathname):
             return False
     return True
 
+
 def parseconnectomename(thefile, volumeproc=True):
     absname = os.path.abspath(thefile)
     therundir, thefmrifile = os.path.split(absname)
@@ -200,9 +225,7 @@ def parsecolename(thefile, volumeproc=True):
     return absname, thesubj, therun, pedir
 
 
-def findboldfiles_HCP(
-    theroot, thetype, volumeproc, usefixforglm, inputlistfile=None, debug=False
-):
+def findboldfiles_HCP(theroot, thetype, volumeproc, usefixforglm, inputlistfile=None, debug=False):
     # special options depending on whether using volume or grayordinate files
     if inputlistfile is None:
         if volumeproc:
@@ -217,9 +240,7 @@ def findboldfiles_HCP(
                 thetype + "_[LR][LR].nii.gz",
             )
         else:
-            searchstring = os.path.join(
-                outputroot, "*", thetype + "_[LR][LR]_grayordinate.nii.gz"
-            )
+            searchstring = os.path.join(outputroot, "*", thetype + "_[LR][LR]_grayordinate.nii.gz")
         if debug:
             print("searchstring:", searchstring)
         return glob.glob(searchstring)
@@ -278,8 +299,12 @@ def parsebidsname(thefile):
         pedir = None
     return absname, thefmrifile, thesubj, theses, therun, pedir
 
+
 def findboldfiles_fmriprep(
-    inputlistfile=None, debug=False, space="MNI152NLin6Asym", bidsroot="/data/frederic/OASIS",
+    inputlistfile=None,
+    debug=False,
+    space="MNI152NLin6Asym",
+    bidsroot="/data/frederic/OASIS",
 ):
     if inputlistfile is None:
         searchstring = os.path.join(
@@ -314,9 +339,11 @@ def findboldfiles_fmriprep(
             retlist.append(glob.glob(searchstring))
         return [val for sublist in retlist for val in sublist]
 
-../derivatives/fmriprep/sub-OAS30006/ses-d2341/func
+
 def findboldfiles_BIDS_multisession(
-    inputlistfile=None, debug=False, bidsroot="/data/frederic/OASIS",
+    inputlistfile=None,
+    debug=False,
+    bidsroot="/data/frederic/OASIS",
 ):
     if inputlistfile is None:
         searchstring = os.path.join(
@@ -360,9 +387,7 @@ def findboldfiles_cole(
                 "*_Clean_" + thetype + "_[LR][LR].nii.gz",
             )
         else:
-            searchstring = os.path.join(
-                outputroot, "*", thetype + "_[LR][LR]_grayordinate.nii.gz"
-            )
+            searchstring = os.path.join(outputroot, "*", thetype + "_[LR][LR]_grayordinate.nii.gz")
         if debug:
             print("searchstring:", searchstring)
         return glob.glob(searchstring)
@@ -396,6 +421,8 @@ def findboldfiles_cole(
                 print("searchstring:", searchstring)
             retlist.append(glob.glob(searchstring))
         return [val for sublist in retlist for val in sublist]
+
+
 def parsertname(thefile, debug=False):
     absname = os.path.abspath(thefile)
     thesessdir, thefmrifile = os.path.split(absname)
@@ -503,11 +530,11 @@ def main():
         if args.debug:
             print("boldfiles:")
             print(theboldfiles)
-    
+
         if not makeadir(theoutputdir):
             print("cannot initialize output root directory, exiting")
             sys.exit(1)
- 
+
         for thefile in theboldfiles:
             absname, thesubj, thesess, therun = parsertname(thefile, debug=args.debug)
             absname = os.path.abspath(thefile)
@@ -517,8 +544,14 @@ def main():
             initaparcasegmgz = f"{mridir}/aparc+aseg.mgz"
             initaparcasegnifti = os.path.join(theoutputdir, thesubj, f"aparcaseg_fs.nii.gz")
             goodaparcasegfile = os.path.join(theoutputdir, thesubj, f"aparcaseg.nii.gz")
-            goodaparcasegT1file = os.path.join(theoutputdir, thesubj, f"{thesubj}_desc-aparcaseg_dseg.nii.gz")
-            goodaparcasegMNIfile = os.path.join(theoutputdir, thesubj, f"{thesubj}_space-MNI152NLin6Asym_desc-aparcaseg_dseg.nii.gz")
+            goodaparcasegT1file = os.path.join(
+                theoutputdir, thesubj, f"{thesubj}_desc-aparcaseg_dseg.nii.gz"
+            )
+            goodaparcasegMNIfile = os.path.join(
+                theoutputdir,
+                thesubj,
+                f"{thesubj}_space-MNI152NLin6Asym_desc-aparcaseg_dseg.nii.gz",
+            )
             if not makeadir(os.path.join(theoutputdir, thesubj)):
                 print("cannot initialize subject directory, exiting")
                 sys.exit(1)
@@ -527,22 +560,24 @@ def main():
             except KeyError:
                 allgoodaparcasegs[thesubj] = goodaparcasegMNIfile
                 thisaparcaseg = allgoodaparcasegs[thesubj]
-              
+
                 if not os.path.isfile(thisaparcaseg):
                     print(f"{thisaparcaseg} does not exist - creating")
 
                     # copy the reference target
-                    localbadaparcasegfile = os.path.join(theoutputdir, thesubj, "badaparcaseg.nii.gz")
+                    localbadaparcasegfile = os.path.join(
+                        theoutputdir, thesubj, "badaparcaseg.nii.gz"
+                    )
                     shutil.copy(badaparcasegfile, localbadaparcasegfile)
- 
+
                     # get the fs to native transform
                     fstonativexfm = f"{anatdir}/{thesubj}_from-fsnative_to-T1w_mode-image_xfm.txt"
                     localfstonativexfm = os.path.join(theoutputdir, thesubj, "fstonativexfm.txt")
                     shutil.copy(fstonativexfm, localfstonativexfm)
-    
+
                     # first make a correct aparcaseg file
                     mriconvert(initaparcasegmgz, initaparcasegnifti)
- 
+
                     T1toMNIfile = (
                         f"{anatdir}/{thesubj}_from-T1w_to-MNI152NLin6Asym_mode-image_xfm.h5"
                     )
@@ -551,25 +586,29 @@ def main():
                         shutil.copy(T1toMNIfile, localT1toMNIfile)
 
                     # now map it to the native T1 space
-                    antsapply(initaparcasegnifti,
-                                localbadaparcasegfile,
-                                goodaparcasegT1file,
-                                [localfstonativexfm],
-                                cluster=True,
-                                fake=(not args.doforreal),
-                                debug=args.debug,
-                                interp="NearestNeighbor")
+                    antsapply(
+                        initaparcasegnifti,
+                        localbadaparcasegfile,
+                        goodaparcasegT1file,
+                        [localfstonativexfm],
+                        cluster=True,
+                        fake=(not args.doforreal),
+                        debug=args.debug,
+                        interp="NearestNeighbor",
+                    )
 
                     # now map it to MNI152NLin6Asym space
-                    antsapply(initaparcasegnifti,
-                                thefile,
-                                thisaparcaseg,
-                                [localT1toMNIfile,localfstonativexfm],
-                                cluster=True,
-                                fake=(not args.doforreal),
-                                debug=args.debug,
-                                interp="NearestNeighbor")
-    
+                    antsapply(
+                        initaparcasegnifti,
+                        thefile,
+                        thisaparcaseg,
+                        [localT1toMNIfile, localfstonativexfm],
+                        cluster=True,
+                        fake=(not args.doforreal),
+                        debug=args.debug,
+                        interp="NearestNeighbor",
+                    )
+
             """
             # now warp rapiditide maps to T1 space
             MNItoT1file = (
@@ -604,26 +643,31 @@ def main():
 
             """
             # average over regions
-            #summaryfileroot = os.path.join(
+            # summaryfileroot = os.path.join(
             #    theoutputdir, thesubj, thesess, f"{thesubj}_{thesess}_{therun}_space-T1_desc-{themaptype}_freesurferaverage"
-            #)
+            # )
             summaryfileroot = os.path.join(
-                theoutputdir, thesubj, thesess, f"{thesubj}_{thesess}_{therun}_space-MNI152NLin6Asym_desc-{themaptype}_freesurferaverage"
+                theoutputdir,
+                thesubj,
+                thesess,
+                f"{thesubj}_{thesess}_{therun}_space-MNI152NLin6Asym_desc-{themaptype}_freesurferaverage",
             )
             thedatalabel = "_".join([thesubj, thesess, therun, themaptype])
             regionlistfile = "/data/frederic/tofrapidtide/code/regionlist"
             if not os.path.isfile(summaryfileroot + "_regionsummaries.csv"):
-                atlasaverageapply(thefile,
-                                thisaparcaseg,
-                                summaryfileroot,
-                                regionlist=regionlistfile,
-                                label=thedatalabel,
-                                nozero=True,
-                                cluster=True,
-                                header=True,
-                                fake=(not args.doforreal),
-                                debug=args.debug)
-   
-    
+                atlasaverageapply(
+                    thefile,
+                    thisaparcaseg,
+                    summaryfileroot,
+                    regionlist=regionlistfile,
+                    label=thedatalabel,
+                    nozero=True,
+                    cluster=True,
+                    header=True,
+                    fake=(not args.doforreal),
+                    debug=args.debug,
+                )
+
+
 if __name__ == "__main__":
     main()
