@@ -173,6 +173,68 @@ def findboldfiles_HCP(
         return [val for sublist in retlist for val in sublist]
 
 
+def parsebidsname(thefile):
+    absname = os.path.abspath(thefile)
+    therundir, thefmrifile = os.path.split(absname)
+    theparts = thefmrifile.split("_")
+    nameparts = {}
+    for thepart in theparts:
+        splitparts = thepart.split("-")
+        if len(splitparts) == 2:
+            nameparts[splitparts[0]] = splitparts[1]
+    try:
+        thesubj = nameparts["sub"]
+    except KeyError:
+        print("no subject key!")
+        sys.exit()
+    try:
+        theses = nameparts["ses"]
+    except KeyError:
+        theses = None
+    try:
+        therun = nameparts["run"]
+    except KeyError:
+        therun = None
+    try:
+        pedir = nameparts["dir"]
+    except KeyError:
+        pedir = None
+    return absname, thefmrifile, thesubj, theses, therun, pedir
+
+
+def findboldfiles_BIDS_multisession(
+    inputlistfile=None, debug=False, bidsroot="/data/frederic/OASIS",
+):
+    if inputlistfile is None:
+        searchstring = os.path.join(
+            bidsroot,
+            "sub*",
+            "ses*",
+            "func",
+            "*bold.nii.gz",
+        )
+        if debug:
+            print("searchstring:", searchstring)
+        return glob.glob(searchstring)
+    else:
+        print("using subject list")
+        inputlist = readlist(inputlistfile)
+        print("subject list is ", inputlist)
+        retlist = []
+        for subject in inputlist:
+            searchstring = os.path.join(
+                bidsroot,
+                "sub-" + str(subject),
+                "ses*",
+                "func",
+                "*bold.nii.gz",
+            )
+            if debug:
+                print("searchstring:", searchstring)
+            retlist.append(glob.glob(searchstring))
+        return [val for sublist in retlist for val in sublist]
+
+
 def findboldfiles_cole(
     theroot, thetype, volumeproc, usefixforglm, inputlistfile=None, debug=False
 ):
