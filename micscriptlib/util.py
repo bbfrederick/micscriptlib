@@ -88,7 +88,7 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debu
                 sub_cmd = f"{SBATCH} {waitstr} {scriptfile}".split()
             if debug:
                 print("sub_cmd:", sub_cmd)
-            thereturn = subprocess.check_output(sub_cmd)
+            thereturn = subprocess.check_output(sub_cmd)[0]
             return str(thereturn)
         else:
             subprocess.call(thecmd)
