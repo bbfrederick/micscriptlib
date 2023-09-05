@@ -81,9 +81,11 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, debug=False):
                 sub_cmd = f"{QSUB} -cwd -q fmriprep.q -N {jobname} -w e -R y {filename}".split()
             elif SYSTYPE == "slurm":
                 sub_cmd = f"{SBATCH} {scriptfile}".split()
-                subprocess.call(sub_cmd)
+            thereturn = subprocess.check_output(sub_cmd)
+            return str(thereturn)
         else:
             subprocess.call(thecmd)
+            return None
 
 
 def batchruncmd(thecmd, readable=False, fake=False, debug=False):
@@ -104,8 +106,8 @@ def mriconvert(inputfile, outputfile, cluster=False, fake=False, debug=False):
     convcmd += ["mri_convert"]
     convcmd += [inputfile]
     convcmd += [outputfile]
-    runcmd(convcmd, cluster=cluster, fake=fake, debug=debug)
-
+    pidnum = runcmd(convcmd, cluster=cluster, fake=fake, debug=debug)
+    return pidnum
 
 def n4correct(inputfile, outputdir, cluster=False, fake=False, debug=False):
     thename, theext = tide_io.niftisplitext(inputfile)
@@ -114,8 +116,8 @@ def n4correct(inputfile, outputdir, cluster=False, fake=False, debug=False):
     n4cmd += ["-d", "3"]
     n4cmd += ["-i", inputfile]
     n4cmd += ["-o", pjoin(outputdir, thename + "_n4" + theext)]
-    runcmd(n4cmd, cluster=cluster, fake=fake, debug=debug)
-
+    pidnum = runcmd(n4cmd, cluster=cluster, fake=fake, debug=debug)
+    return pidnum
 
 def antsapply(
     inputname,
@@ -138,8 +140,8 @@ def antsapply(
         applyxfmcmd += ["--interpolation", interp]
     for thetransform in transforms:
         applyxfmcmd += ["--transform", thetransform]
-    runcmd(applyxfmcmd, cluster=cluster, fake=fake, debug=debug)
-
+    pidnum = runcmd(applyxfmcmd, cluster=cluster, fake=fake, debug=debug)
+    return pidnum
 
 def atlasaverageapply(
     inputfile,
@@ -166,8 +168,8 @@ def atlasaverageapply(
         atlasavgcmd += ["--datalabel", label]
     if regionlist is not None:
         atlasavgcmd += ["--regionlistfile", regionlist]
-    runcmd(atlasavgcmd, cluster=cluster, fake=fake, debug=debug)
-
+    pidnum = runcmd(atlasavgcmd, cluster=cluster, fake=fake, debug=debug)
+    return pidnum
 
 def readlist(inputfilename):
     inputlist = []
