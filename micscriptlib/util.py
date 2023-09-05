@@ -273,8 +273,8 @@ def findboldfiles_HCP(theroot, thetype, volumeproc, usefixforglm, inputlistfile=
 
 def parsebidsname(thefile):
     absname = os.path.abspath(thefile)
-    therundir, thefmrifile = os.path.split(absname)
-    theparts = thefmrifile.split("_")
+    therundir, thefilename = os.path.split(absname)
+    theparts = thefilename.split("_")
     nameparts = {}
     for thepart in theparts:
         splitparts = thepart.split("-")
@@ -297,7 +297,12 @@ def parsebidsname(thefile):
         pedir = nameparts["dir"]
     except KeyError:
         pedir = None
-    return absname, thefmrifile, thesubj, theses, therun, pedir
+    try:
+        thespace = nameparts["space"]
+    except KeyError:
+        thespace = None
+
+    return absname, thefilename, thesubj, theses, therun, pedir, thespace
 
 
 def findboldfiles_fmriprep(
