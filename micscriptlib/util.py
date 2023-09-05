@@ -23,7 +23,7 @@ else:
     SINGULARITY = "/cm/local/apps/apptainer/current/bin/singularity"
 
 
-def make_runscript(thecommand, jobname=rapidtide, ncpus=8, timelimit="0:30:00", mem="16G"):
+def make_runscript(thecommand, jobname="rapidtide", ncpus=8, timelimit="0:30:00", mem="16G"):
     """
     Create a temporary script file we can submit to qsub.
     """
