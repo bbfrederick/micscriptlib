@@ -296,6 +296,10 @@ def parsebidsname(thefile):
         print("no subject key!")
         sys.exit()
     try:
+        thetask = nameparts["task"]
+    except KeyError:
+        thetask = None
+    try:
         theses = nameparts["ses"]
     except KeyError:
         theses = None
@@ -312,7 +316,84 @@ def parsebidsname(thefile):
     except KeyError:
         thespace = None
 
-    return absname, thefilename, thesubj, theses, therun, pedir, thespace
+    return absname, thefilename, thesubj, theses, therun, pedir, thetask, thespace
+
+
+def findboldfiles_psusleep(
+    thetype,
+    inputlistfile=None,
+    debug=False,
+    space="MNI152NLin6Asym",
+    bidsroot="/data/ckorponay/Sleep",
+):
+    if inputlistfile is None:
+        searchstring = os.path.join(
+            bidsroot,
+            "fmriprep",
+            "sub*",
+            "func",
+            f"*{thetype}*smoothAROMAnonaggr_bold.nii.gz",
+        )
+        if debug:
+            print("searchstring:", searchstring)
+        return glob.glob(searchstring)
+    else:
+        print("using subject list")
+        inputlist = readlist(inputlistfile)
+        print("subject list is ", inputlist)
+        retlist = []
+        for subject in inputlist:
+            searchstring = os.path.join(
+                bidsroot,
+                "fmriprep",
+                "sub-" + str(subject),
+                "func",
+                f"*{thetype}*smoothAROMAnonaggr_bold.nii.gz",
+            )
+            #    f"*{thetype}*{space}*bold.nii.gz",
+            if debug:
+                print("searchstring:", searchstring)
+            retlist.append(glob.glob(searchstring))
+        return [val for sublist in retlist for val in sublist]
+
+
+def findboldfiles_recig(
+    thetype,
+    inputlistfile=None,
+    debug=False,
+    bidsroot="/data/ajanes/REcig/fmri",
+):
+    if inputlistfile is None:
+        searchstring = os.path.join(
+            bidsroot,
+            "Recig_*",
+            "visit*",
+            thetype,
+            f"*{thetype}*visit*.feat",
+            "filtered_func_data.nii.gz",
+        )
+        if debug:
+            print("searchstring:", searchstring)
+        return glob.glob(searchstring)
+    else:
+        print("using subject list")
+        inputlist = readlist(inputlistfile)
+        print("subject list is ", inputlist)
+        retlist = []
+        for subject in inputlist:
+            searchstring = os.path.join(
+                bidsroot,
+                "Recig_" + str(subject),
+                "visit*",
+                thetype,
+                f"*{thetype}*visit*.feat",
+                "filtered_func_data.nii.gz",
+            )
+            #    f"*{thetype}*{space}*bold.nii.gz",
+            if debug:
+                print("searchstring:", searchstring)
+            retlist.append(glob.glob(searchstring))
+        return [val for sublist in retlist for val in sublist]
 
 
 def findboldfiles_fmriprep(
