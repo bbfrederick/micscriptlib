@@ -2,25 +2,27 @@
 #
 import argparse
 import glob
-
-import sys
-import shutil
-
 import os
+import shutil
 import subprocess
+import sys
 from os.path import join as pjoin
 
+import rapidtide.io as tide_io
 
-QSUB = "/cm/shared/apps/sge/2011.11p1/bin/linux-x64/qsub"
-SBATCH = "/cm/shared/apps/slurm/current/bin/sbatch"
-if os.path.isfile(QSUB):
-    SYSTYPE = "sge"
-    SUBMITTER = QSUB
-    SINGULARITY = "/usr/bin/singularity"
-else:
-    SYSTYPE = "slurm"
-    SUBMITTER = SBATCH
-    SINGULARITY = "/cm/local/apps/apptainer/current/bin/singularity"
+
+def getbatchinfo():
+    QSUB = "/cm/shared/apps/sge/2011.11p1/bin/linux-x64/qsub"
+    SBATCH = "/cm/shared/apps/slurm/current/bin/sbatch"
+    if os.path.isfile(QSUB):
+        SYSTYPE = "sge"
+        SUBMITTER = QSUB
+        SINGULARITY = "/usr/bin/singularity"
+    else:
+        SYSTYPE = "slurm"
+        SUBMITTER = SBATCH
+        SINGULARITY = "/cm/local/apps/apptainer/current/bin/singularity"
+    return SYSTYPE, SUBMITTER, SINGULARITY
 
 
 def make_runscript(thecommand, jobname="rapidtide", ncpus=8, timelimit="0:30:00", mem="16G"):
@@ -63,6 +65,7 @@ else:
 
 
 def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debug=False):
+    SYSTYPE, SUBMITTER, SINGULARITY = getbatchinfo()
     if debug:
         print(thecmd)
     if fake:
@@ -81,13 +84,11 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debu
             if SYSTYPE == "sge":
                 if waitfor is not None:
                     waitstr = f"-j {waitfor}"
-                sub_cmd = (
-                    f"{QSUB} -cwd -q fmriprep.q -N {jobname} -w e -R y {waitstr} {thecmd}".split()
-                )
+                sub_cmd = f"{SUBMITTER} -cwd -q fmriprep.q -N {jobname} -w e -R y {waitstr} {thecmd}".split()
             elif SYSTYPE == "slurm":
                 if waitfor is not None:
                     waitstr = f"--dependency afterok:{waitfor}"
-                sub_cmd = f"{SBATCH} {waitstr} {scriptfile}".split()
+                sub_cmd = f"{SUBMITTER} {waitstr} {scriptfile}".split()
             if debug:
                 print("sub_cmd:", sub_cmd)
             thereturn = subprocess.check_output(sub_cmd).split()
@@ -222,16 +223,10 @@ def parseconnectomename(thefile, volumeproc=True):
 def parsecolename(thefile, volumeproc=True):
     absname = os.path.abspath(thefile)
     therundir, thefmrifile = os.path.split(absname)
-    if volumeproc:
-        theparts = thefmrifile.split("_")
-        thesubj = theparts[0]
-        therun = theparts[3]
-        pedir = theparts[-1][0:2]
-    else:
-        splitname = thefmrifile.split("_")
-        thesubj = therun
-        therun = "_".join(splitname[0:2])
-        pedir = splitname[2]
+    theparts = thefmrifile.split("_")
+    thesubj = theparts[0]
+    therun = theparts[3]
+    pedir = theparts[-1][0:2]
     return absname, thesubj, therun, pedir
 
 
@@ -240,7 +235,7 @@ def findboldfiles_HCP(theroot, thetype, volumeproc, usefixforglm, inputlistfile=
     if inputlistfile is None:
         if volumeproc:
             searchstring = os.path.join(
-                connectomeroot,
+                theroot,
                 "*",
                 "preproc",
                 "*",
@@ -250,7 +245,7 @@ def findboldfiles_HCP(theroot, thetype, volumeproc, usefixforglm, inputlistfile=
                 thetype + "_[LR][LR].nii.gz",
             )
         else:
-            searchstring = os.path.join(outputroot, "*", thetype + "_[LR][LR]_grayordinate.nii.gz")
+            searchstring = os.path.join(theroot, "*", thetype + "_[LR][LR]_grayordinate.nii.gz")
         if debug:
             print("searchstring:", searchstring)
         return glob.glob(searchstring)
@@ -262,7 +257,7 @@ def findboldfiles_HCP(theroot, thetype, volumeproc, usefixforglm, inputlistfile=
         for subject in inputlist:
             if volumeproc:
                 searchstring = os.path.join(
-                    connectomeroot,
+                    theroot,
                     str(subject),
                     "preproc",
                     "*",
@@ -273,7 +268,7 @@ def findboldfiles_HCP(theroot, thetype, volumeproc, usefixforglm, inputlistfile=
                 )
             else:
                 searchstring = os.path.join(
-                    outputroot, str(subject), thetype + "_[LR][LR]_grayordinate.nii.gz"
+                    theroot, str(subject), thetype + "_[LR][LR]_grayordinate.nii.gz"
                 )
             if debug:
                 print("searchstring:", searchstring)
@@ -515,12 +510,12 @@ def findboldfiles_cole(
     if inputlistfile is None:
         if volumeproc:
             searchstring = os.path.join(
-                connectomeroot,
+                theroot,
                 "*",
                 "*_Clean_" + thetype + "_[LR][LR].nii.gz",
             )
         else:
-            searchstring = os.path.join(outputroot, "*", thetype + "_[LR][LR]_grayordinate.nii.gz")
+            searchstring = os.path.join(theroot, "*", thetype + "_[LR][LR]_grayordinate.nii.gz")
         if debug:
             print("searchstring:", searchstring)
         return glob.glob(searchstring)
@@ -532,7 +527,7 @@ def findboldfiles_cole(
         for subject in inputlist:
             if volumeproc:
                 searchstring = os.path.join(
-                    connectomeroot,
+                    theroot,
                     str(subject),
                     "preproc",
                     "*",
@@ -542,13 +537,13 @@ def findboldfiles_cole(
                     thetype + "_[LR][LR].nii.gz",
                 )
                 searchstring = os.path.join(
-                    connectomeroot,
+                    theroot,
                     str(subject),
                     "*_Clean_" + thetype + "_[LR][LR].nii.gz",
                 )
             else:
                 searchstring = os.path.join(
-                    outputroot, str(subject), thetype + "_[LR][LR]_grayordinate.nii.gz"
+                    theroot, str(subject), thetype + "_[LR][LR]_grayordinate.nii.gz"
                 )
             if debug:
                 print("searchstring:", searchstring)

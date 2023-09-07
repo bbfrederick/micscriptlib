@@ -24,9 +24,8 @@ from m2r import MdInclude
 sys.path.insert(0, os.path.abspath("sphinxext"))
 sys.path.insert(0, os.path.abspath("../picachooser"))
 
-from github_link import make_linkcode_resolve
-
 import picachooser
+from github_link import make_linkcode_resolve
 
 # -- General configuration ------------------------------------------------
 
