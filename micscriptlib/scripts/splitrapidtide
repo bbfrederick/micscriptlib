@@ -15,33 +15,6 @@ import sys
 import time
 import micscriptlib.util as micutil
 
-QSUB = "/cm/shared/apps/sge/2011.11p1/bin/linux-x64/qsub"
-SBATCH = "/cm/shared/apps/slurm/current/bin/sbatch"
-if os.path.isfile(QSUB):
-    SYSTYPE = "sge"
-    SUBMITTER = QSUB
-    SINGULARITY = "/usr/bin/singularity"
-else:
-    SYSTYPE = "slurm"
-    SUBMITTER = SBATCH
-    SINGULARITY = "/cm/local/apps/apptainer/current/bin/singularity"
-
-
-# file locations
-sourcetype = "psusleep"
-outputroot = f"/data/frederic/{sourcetype}/derivatives"
-if sourcetype == "cole":
-    connectomeroot = "/data/ckorponay/New_HCP_Cleaned_TomMethod"
-    theoutputdir = os.path.join(outputroot, "splitanalysis", "output")
-elif sourcetype == "psusleep":
-    connectomeroot = "/data/ckorponay/Sleep/fmriprep"
-    theoutputdir = os.path.join(outputroot, "splitanalysis", "output")
-else:
-    connectomeroot = "/data2/HCP1200"
-    theoutputdir = os.path.join(outputroot, "splitanalysis", "output")
-
-rapidtidecmd = "/cm/shared/anaconda3/envs/mic/bin/rapidtide"
-
 
 def _get_parser():
     # get the command line parameters
@@ -386,10 +359,10 @@ def splitrapidtide_workflow(sourcetype):
                 if dothis:
                     if args.doforreal:
                         if SYSTYPE == "sge":
-                            sub_cmd = f"{QSUB} -cwd -q fmriprep.q -N {args.jobname} -pe fmriprep {args.ncpus} -w e -R y {filename}".split()
+                            sub_cmd = f"{SUBMITTER} -cwd -q fmriprep.q -N {args.jobname} -pe fmriprep {args.ncpus} -w e -R y {thiscommand}".split()
                         elif SYSTYPE == "slurm":
-                            sub_cmd = f"{SBATCH} {scriptfile}".split()
-                            subprocess.call(sub_cmd)
+                            sub_cmd = f"{SUBMITTER} {scriptfile}".split()
+                        subprocess.call(sub_cmd)
                     else:
                         print(thescript)
 
