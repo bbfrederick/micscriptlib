@@ -43,7 +43,7 @@ def _get_parser():
         type=int,
         action="store",
         help="first TR to use (default is 20)",
-        default=29,
+        default=12,
     )
     parser.add_argument(
         "--ncpus",
@@ -68,13 +68,6 @@ def _get_parser():
         dest="existcheck",
         help="run rapidtide even if output file already exists",
         default=True,
-    )
-    parser.add_argument(
-        "--swap",
-        action="store_true",
-        dest="isswapped",
-        help="do a null correlation run (analyze with the other PE direction regressor)",
-        default=False,
     )
     parser.add_argument(
         "--fake",
@@ -127,26 +120,27 @@ def splitrapidtide_workflow(sourcetype):
         print(args)
 
     # define some globals
-    extrasuffix = "_spf-2p0"
+    extrasuffix = ""
     spatialfiltwidth = 2.0
 
     # file locations
     outputroot = f"/data/frederic/{sourcetype}/derivatives"
+    derivativetype = "rapidtide"
     if sourcetype == "cole":
         inputroot = "/data/ckorponay/New_HCP_Cleaned_TomMethod"
-        theoutputdir = os.path.join(outputroot, "gms")
+        theoutputdir = os.path.join(outputroot, "rapidtide")
         thetypes = ["REST1", "REST2"]
     elif sourcetype == "psusleep":
         inputroot = "/data/ckorponay/Sleep/fmriprep"
-        theoutputdir = os.path.join(outputroot, "gms")
+        theoutputdir = os.path.join(outputroot, "rapidtide")
         thetypes = ["rest", "sleep"]
     elif sourcetype == "recig":
         inputroot = "/data/ajanes/REcig/fmri"
-        theoutputdir = os.path.join(outputroot, "gms")
+        theoutputdir = os.path.join(outputroot, "rapidtide")
         thetypes = ["cue1", "cue2", "cue3", "cue4", "cue5", "resting"]
     else:
         inputroot = "/data2/HCP1200"
-        theoutputdir = os.path.join(outputroot, "gms")
+        theoutputdir = os.path.join(outputroot, "rapidtide")
         rest1runs = ["rfMRI_REST1"]
         rest2runs = ["rfMRI_REST2"]
         emotionruns = ["tfMRI_EMOTION"]
@@ -259,6 +253,35 @@ def splitrapidtide_workflow(sourcetype):
                     thefile, volumeproc=args.volumeproc
                 )
                 print(f"{absname=}, {thesubj=}, {therun=}, {pedir=}")
+                outroot = os.path.join(
+                    thesubj,
+                    thesubj
+                    + "_"
+                    + thetask
+                    + "_"
+                    + thesess
+                    + outputnamesuffix
+                    + extrasuffix
+                )
+            elif sourcetype == "recig":
+                absname, thefmrifilename, thesubj, thesess, thetask = micutil.parserecigname(thefile)
+                thesubj = f"sub-{thesubj}"
+                thetask = f"task-{thetask}"
+                thesess = f"ses-{thesess}"
+                if args.debug:
+                    print(f"{absname=}")
+                    print(f"{thefmrifilename=}")
+                    print(f"{thesubj=}")
+                    print(f"{thesess=}")
+                    print(f"{thetask=}")
+                outroot = os.path.join(
+                    thesubj,
+                    thesubj
+                    + "_"
+                    + thetask
+                    + "_"
+                    + thesess
+                )
             elif sourcetype == "psusleep":
                 absname, thefmrifilename, thesubj, thesess, therun, pedir, thetask, thespace = micutil.parsebidsname(thefile)
                 thesubj = f"sub-{thesubj}"
@@ -272,9 +295,29 @@ def splitrapidtide_workflow(sourcetype):
                     print(f"{pedir=}")
                     print(f"{thetask=}")
                     print(f"{thespace=}")
+                outroot = os.path.join(
+                    thesubj,
+                    thesubj
+                    + "_"
+                    + thetask
+                    + "_"
+                    + thesess
+                    + outputnamesuffix
+                    + extrasuffix
+                )
             else:
                 absname, thesubj, therun, pedir = micutil.parseconnectomename(
                     thefile, volumeproc=args.volumeproc
+                outroot = os.path.join(
+                    thesubj,
+                    thesubj
+                    + "_"
+                    + thetask
+                    + "_"
+                    + thesess
+                    + outputnamesuffix
+                    + extrasuffix,
+                )
                 )
             absname = os.path.abspath(thefile)
             therundir, thefmrifile = os.path.split(absname)
@@ -284,27 +327,7 @@ def splitrapidtide_workflow(sourcetype):
                 sys.exit(1)
 
             print("thefmrifile is", thefmrifile)
-            if args.isswapped:
-                print("doing swapped run")
-                swapname = "_swap_"
-                if pedir == "LR":
-                    regressortouse = "RL"
-                else:
-                    regressortouse = "LR"
-            else:
-                print("doing unswapped run")
-                swapname = "_noswap_"
-                regressortouse = pedir
-            regressoropts = ["--passes 3"]
 
-            outroot = os.path.join(
-                thesubj,
-                thesubj
-                + "_"
-                + thetype
-                + outputnamesuffix
-                + extrasuffix,
-            )
             thecommand = []
             fmrifile = absname
             thecommand.append(rapidtidecmd)
@@ -323,15 +346,21 @@ def splitrapidtide_workflow(sourcetype):
                 #thecommand.extend(splitopt)
             thecommand += rapidtideopts
 
-            # put in the regressor options
-            #thecommand.extend(regressoropts.split())
-            thecommand += regressoropts
-
             # before submitting the job, check to see if output file exists
-            if thetype == "sleep":
-                endpoint = 428
+            if sourcetype=="psusleep":
+                if thetype == "sleep":
+                    endpoint = 428
+                else:
+                    endpoint = 285
+            elif sourcetype=="recig":
+                if thetype == "resting":
+                    endpoint = 499
+                else:
+                    endpoint = 427
+            elif sourcetype=="HCP":
+                endpoint = 1199
             else:
-                endpoint = 285
+                endpoint = 100
             numpoints = endpoint - args.startpoint + 1
             pointspersection = numpoints // args.numsections
             print(f"dividing timecourse into {args.numsections} sections of {pointspersection} points")
