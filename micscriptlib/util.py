@@ -283,7 +283,7 @@ def parserecigname(thefile):
     theparts = therunkey.split("_")
     thesubj = theparts[0]
     thetask = theparts[1]
-    theses = (theparts[2])[-1]
+    theses = (theparts[2].split("."))[0]
 
     return absname, thefilename, thesubj, theses, thetask
 

@@ -268,7 +268,7 @@ def splitrapidtide_workflow(sourcetype):
                     print(f"{thesubj=}")
                     print(f"{thesess=}")
                     print(f"{thetask=}")
-                outroot = os.path.join(thesubj, thesubj + "_" + thetask + "_" + thesess)
+                outroot = os.path.join(thesubj, thesubj + "_" + thesess + "_" + thetask)
             elif sourcetype == "psusleep":
                 (
                     absname,
