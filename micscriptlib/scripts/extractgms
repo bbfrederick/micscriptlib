@@ -13,7 +13,6 @@ import sys
 
 import micscriptlib.util as micutil
 
-
 fslmeantscmd = os.path.join(os.environ["FSLDIR"], "bin", "fslmeants")
 
 def _get_parser():
