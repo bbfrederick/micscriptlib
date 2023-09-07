@@ -7,14 +7,11 @@
 from __future__ import print_function
 
 import argparse
-import glob
-import operator
 import os
 import subprocess
 import sys
-import time
 
-import micscriptlib as micutil
+import micscriptlib.util as micutil
 
 # file locations
 sourcetype = "psusleep"
