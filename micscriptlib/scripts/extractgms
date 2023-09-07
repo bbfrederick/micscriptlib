@@ -16,16 +16,6 @@ import time
 
 import micscriptlib as micutil
 
-QSUB = "/cm/shared/apps/sge/2011.11p1/bin/linux-x64/qsub"
-SBATCH = "/cm/shared/apps/slurm/current/bin/sbatch"
-if os.path.isfile(QSUB):
-    SYSTYPE = "sge"
-    SUBMITTER = QSUB
-else:
-    SYSTYPE = "slurm"
-    SUBMITTER = SBATCH
-
-
 # file locations
 sourcetype = "psusleep"
 outputroot = f"/data/frederic/{sourcetype}/derivatives"
@@ -126,6 +116,8 @@ def main():
     # make the appropriate output directory
     theoutputdir = f"{theoutputdir}_gms"
 
+    SYSTYPE, SUBMITTER, SINGULARITY = micutil.getbatchinfo()
+
     # only run resting state 1 for the time being
     thetypes = ["cue1", "cue2", "cue3", "cue4", "cue5", "resting"]
     thetypes = ["rest", "sleep"]
@@ -220,9 +212,9 @@ def main():
             if dothis:
                 if args.doforreal:
                     if SYSTYPE == "sge":
-                        sub_cmd = f"{QSUB} -cwd -q short.q -N fslmeants -w e -R y {scriptfile}".split()
+                        sub_cmd = f"{SUBMITTER} -cwd -q short.q -N fslmeants -w e -R y {thiscommand}".split()
                     elif SYSTYPE == "slurm":
-                        sub_cmd = f"{SBATCH} {scriptfile}".split()
+                        sub_cmd = f"{SUBMITTER} {scriptfile}".split()
                     subprocess.call(sub_cmd)
                 else:
                     print(thescript)
