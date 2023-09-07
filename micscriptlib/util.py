@@ -276,6 +276,18 @@ def findboldfiles_HCP(theroot, thetype, volumeproc, usefixforglm, inputlistfile=
         return [val for sublist in retlist for val in sublist]
 
 
+def parserecigname(thefile):
+    absname = os.path.abspath(thefile)
+    therundir, thefilename = os.path.split(absname)
+    thetopdir, therunkey = os.path.split(therundir)
+    theparts = therunkey.split("_")
+    thesubj = theparts[0]
+    thetask = theparts[1]
+    theses = (theparts[2])[-1]
+
+    return absname, thefilename, thesubj, theses, thetask
+
+
 def parsebidsname(thefile):
     absname = os.path.abspath(thefile)
     therundir, thefilename = os.path.split(absname)
@@ -364,7 +376,7 @@ def findboldfiles_recig(
             "Recig_*",
             "visit*",
             thetype,
-            f"*{thetype}*visit*.feat",
+            f"*{thetype}*visit[12].feat",
             "filtered_func_data.nii.gz",
         )
         if debug:
@@ -381,7 +393,7 @@ def findboldfiles_recig(
                 "Recig_" + str(subject),
                 "visit*",
                 thetype,
-                f"*{thetype}*visit*.feat",
+                f"*{thetype}*visit[12].feat",
                 "filtered_func_data.nii.gz",
             )
             #    f"*{thetype}*{space}*bold.nii.gz",
@@ -589,213 +601,3 @@ def findrtfiles(theroot, themaptype, inputlistfile=None, debug=False):
                 print("searchstring:", searchstring)
             retlist.append(glob.glob(searchstring))
         return [val for sublist in retlist for val in sublist]
-
-
-def _get_parser():
-    # get the command line parameters
-    parser = argparse.ArgumentParser(
-        prog="extractrtvals",
-        description="extracts and averages rapidtide values based on the subject's freesurfer parcellation",
-        usage="%(prog)s",
-    )
-    parser.add_argument(
-        "--inputlist",
-        metavar="INPUTLIST",
-        type=str,
-        action="store",
-        dest="inputlistfile",
-        help="read a list of subjects to analyze (default is to run all subjects)",
-        default=None,
-    )
-    parser.add_argument(
-        "--fake",
-        action="store_false",
-        dest="doforreal",
-        help="just print out the commands that will be executed rather than running them",
-        default=True,
-    )
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        dest="debug",
-        help="output extra debugging information",
-        default=False,
-    )
-    return parser
-
-
-##########################################################################################
-##########################################################################################
-#
-# control flow starts here
-#
-
-##########################################################################################
-
-
-def main():
-    theoutputdir = "/data/frederic/tofrapidtide/derivatives"
-    try:
-        args = _get_parser().parse_args()
-    except SystemExit:
-        _get_parser().print_help()
-        raise
-
-    if args.debug:
-        print(args)
-
-    # define some globals
-    qspec = ""
-
-    allgoodaparcasegs = {}
-    for themaptype in ["maxtime", "maxcorr"]:
-        theboldfiles = findrtfiles(
-            "/data/saslan/R21_OASIS_new",
-            themaptype,
-            inputlistfile=args.inputlistfile,
-            debug=args.debug,
-        )
-        if args.debug:
-            print("boldfiles:")
-            print(theboldfiles)
-
-        if not makeadir(theoutputdir):
-            print("cannot initialize output root directory, exiting")
-            sys.exit(1)
-
-        for thefile in theboldfiles:
-            absname, thesubj, thesess, therun = parsertname(thefile, debug=args.debug)
-            absname = os.path.abspath(thefile)
-            anatdir = f"/home/frederic/OMG/OASIS/derivatives/fmriprep/{thesubj}/anat"
-            mridir = f"/home/frederic/OMG/OASIS/derivatives/freesurfer/{thesubj}/mri"
-            badaparcasegfile = f"{anatdir}/{thesubj}_desc-aparcaseg_dseg.nii.gz"
-            initaparcasegmgz = f"{mridir}/aparc+aseg.mgz"
-            initaparcasegnifti = os.path.join(theoutputdir, thesubj, f"aparcaseg_fs.nii.gz")
-            goodaparcasegfile = os.path.join(theoutputdir, thesubj, f"aparcaseg.nii.gz")
-            goodaparcasegT1file = os.path.join(
-                theoutputdir, thesubj, f"{thesubj}_desc-aparcaseg_dseg.nii.gz"
-            )
-            goodaparcasegMNIfile = os.path.join(
-                theoutputdir,
-                thesubj,
-                f"{thesubj}_space-MNI152NLin6Asym_desc-aparcaseg_dseg.nii.gz",
-            )
-            if not makeadir(os.path.join(theoutputdir, thesubj)):
-                print("cannot initialize subject directory, exiting")
-                sys.exit(1)
-            try:
-                thisaparcaseg = allgoodaparcasegs[thesubj]
-            except KeyError:
-                allgoodaparcasegs[thesubj] = goodaparcasegMNIfile
-                thisaparcaseg = allgoodaparcasegs[thesubj]
-
-                if not os.path.isfile(thisaparcaseg):
-                    print(f"{thisaparcaseg} does not exist - creating")
-
-                    # copy the reference target
-                    localbadaparcasegfile = os.path.join(
-                        theoutputdir, thesubj, "badaparcaseg.nii.gz"
-                    )
-                    shutil.copy(badaparcasegfile, localbadaparcasegfile)
-
-                    # get the fs to native transform
-                    fstonativexfm = f"{anatdir}/{thesubj}_from-fsnative_to-T1w_mode-image_xfm.txt"
-                    localfstonativexfm = os.path.join(theoutputdir, thesubj, "fstonativexfm.txt")
-                    shutil.copy(fstonativexfm, localfstonativexfm)
-
-                    # first make a correct aparcaseg file
-                    mriconvert(initaparcasegmgz, initaparcasegnifti)
-
-                    T1toMNIfile = (
-                        f"{anatdir}/{thesubj}_from-T1w_to-MNI152NLin6Asym_mode-image_xfm.h5"
-                    )
-                    localT1toMNIfile = os.path.join(theoutputdir, thesubj, "T1toMNI.h5")
-                    if not os.path.isfile(localT1toMNIfile):
-                        shutil.copy(T1toMNIfile, localT1toMNIfile)
-
-                    # now map it to the native T1 space
-                    antsapply(
-                        initaparcasegnifti,
-                        localbadaparcasegfile,
-                        goodaparcasegT1file,
-                        [localfstonativexfm],
-                        cluster=True,
-                        fake=(not args.doforreal),
-                        debug=args.debug,
-                        interp="NearestNeighbor",
-                    )
-
-                    # now map it to MNI152NLin6Asym space
-                    antsapply(
-                        initaparcasegnifti,
-                        thefile,
-                        thisaparcaseg,
-                        [localT1toMNIfile, localfstonativexfm],
-                        cluster=True,
-                        fake=(not args.doforreal),
-                        debug=args.debug,
-                        interp="NearestNeighbor",
-                    )
-
-            """
-            # now warp rapiditide maps to T1 space
-            MNItoT1file = (
-                f"{anatdir}/{thesubj}_from-MNI152NLin6Asym_to-T1w_mode-image_xfm.h5"
-            )
-            localMNItoT1file = os.path.join(theoutputdir, thesubj, "MNItoT1.h5")
-
-            if args.debug:
-                print(f"{thisaparcaseg=}")
-                print(f"{MNItoT1file=}")
-            if not makeadir(os.path.join(theoutputdir, thesubj, thesess)):
-                print("cannot initialize output subject session directory, exiting")
-                sys.exit(1)
-    
-
-            warpeddata = os.path.join(
-                theoutputdir, thesubj, thesess, f"{thesubj}_{thesess}_{therun}_space-T1_desc-{themaptype}_map.nii.gz"
-            )
-    
-            if not os.path.isfile(warpeddata):
-                print(f"{warpeddata} does not exist - creating")
-                if not os.path.isfile(localMNItoT1file):
-                    shutil.copy(MNItoT1file, localMNItoT1file)
-                antsapply(thefile,
-                            thisaparcaseg,
-                            warpeddata,
-                            [localMNItoT1file],
-                            cluster=True,
-                            fake=(not args.doforreal),
-                            debug=args.debug,
-                            interp="NearestNeighbor")
-
-            """
-            # average over regions
-            # summaryfileroot = os.path.join(
-            #    theoutputdir, thesubj, thesess, f"{thesubj}_{thesess}_{therun}_space-T1_desc-{themaptype}_freesurferaverage"
-            # )
-            summaryfileroot = os.path.join(
-                theoutputdir,
-                thesubj,
-                thesess,
-                f"{thesubj}_{thesess}_{therun}_space-MNI152NLin6Asym_desc-{themaptype}_freesurferaverage",
-            )
-            thedatalabel = "_".join([thesubj, thesess, therun, themaptype])
-            regionlistfile = "/data/frederic/tofrapidtide/code/regionlist"
-            if not os.path.isfile(summaryfileroot + "_regionsummaries.csv"):
-                atlasaverageapply(
-                    thefile,
-                    thisaparcaseg,
-                    summaryfileroot,
-                    regionlist=regionlistfile,
-                    label=thedatalabel,
-                    nozero=True,
-                    cluster=True,
-                    header=True,
-                    fake=(not args.doforreal),
-                    debug=args.debug,
-                )
-
-
-if __name__ == "__main__":
-    main()
