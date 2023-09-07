@@ -150,7 +150,7 @@ def splitrapidtide_workflow(sourcetype):
         relationalruns = ["tfMRI_RELATIONAL"]
         socialruns = ["tfMRI_SOCIAL"]
         wmruns = ["tfMRI_WM"]
-    
+
         thetypes = (
             emotionruns
             + gamblingruns
@@ -164,7 +164,7 @@ def splitrapidtide_workflow(sourcetype):
         )
     rapidtidecmd = "/cm/shared/anaconda3/envs/mic/bin/rapidtide"
     SYSTYPE, SUBMITTER, SINGULARITY = micutil.getbatchinfo()
-    
+
     if args.debug:
         print(f"sourcetype is {sourcetype}")
         print(f"\t{inputroot=}")
@@ -206,7 +206,6 @@ def splitrapidtide_workflow(sourcetype):
         outputnamesuffix = "_grayordinate"
         qspec = ""
 
-
     # loop over all run types
     for thetype in thetypes:
         # special options depending on whether using volume or grayordinate files
@@ -246,7 +245,6 @@ def splitrapidtide_workflow(sourcetype):
             print("cannot initialize output root directory, exiting")
             sys.exit(1)
 
-
         for thefile in theboldfiles:
             if sourcetype == "cole":
                 absname, thesubj, therun, pedir = micutil.parsecolename(
@@ -255,16 +253,12 @@ def splitrapidtide_workflow(sourcetype):
                 print(f"{absname=}, {thesubj=}, {therun=}, {pedir=}")
                 outroot = os.path.join(
                     thesubj,
-                    thesubj
-                    + "_"
-                    + thetask
-                    + "_"
-                    + thesess
-                    + outputnamesuffix
-                    + extrasuffix
+                    thesubj + "_" + thetask + "_" + thesess + outputnamesuffix + extrasuffix,
                 )
             elif sourcetype == "recig":
-                absname, thefmrifilename, thesubj, thesess, thetask = micutil.parserecigname(thefile)
+                absname, thefmrifilename, thesubj, thesess, thetask = micutil.parserecigname(
+                    thefile
+                )
                 thesubj = f"sub-{thesubj}"
                 thetask = f"task-{thetask}"
                 thesess = f"ses-{thesess}"
@@ -274,16 +268,18 @@ def splitrapidtide_workflow(sourcetype):
                     print(f"{thesubj=}")
                     print(f"{thesess=}")
                     print(f"{thetask=}")
-                outroot = os.path.join(
-                    thesubj,
-                    thesubj
-                    + "_"
-                    + thetask
-                    + "_"
-                    + thesess
-                )
+                outroot = os.path.join(thesubj, thesubj + "_" + thetask + "_" + thesess)
             elif sourcetype == "psusleep":
-                absname, thefmrifilename, thesubj, thesess, therun, pedir, thetask, thespace = micutil.parsebidsname(thefile)
+                (
+                    absname,
+                    thefmrifilename,
+                    thesubj,
+                    thesess,
+                    therun,
+                    pedir,
+                    thetask,
+                    thespace,
+                ) = micutil.parsebidsname(thefile)
                 thesubj = f"sub-{thesubj}"
                 thetask = f"sub-{thetask}"
                 if args.debug:
@@ -297,27 +293,15 @@ def splitrapidtide_workflow(sourcetype):
                     print(f"{thespace=}")
                 outroot = os.path.join(
                     thesubj,
-                    thesubj
-                    + "_"
-                    + thetask
-                    + "_"
-                    + thesess
-                    + outputnamesuffix
-                    + extrasuffix
+                    thesubj + "_" + thetask + "_" + thesess + outputnamesuffix + extrasuffix,
                 )
             else:
                 absname, thesubj, therun, pedir = micutil.parseconnectomename(
                     thefile, volumeproc=args.volumeproc
+                )
                 outroot = os.path.join(
                     thesubj,
-                    thesubj
-                    + "_"
-                    + thetask
-                    + "_"
-                    + thesess
-                    + outputnamesuffix
-                    + extrasuffix,
-                )
+                    thesubj + "_" + thetask + "_" + thesess + outputnamesuffix + extrasuffix,
                 )
             absname = os.path.abspath(thefile)
             therundir, thefmrifile = os.path.split(absname)
@@ -341,29 +325,31 @@ def splitrapidtide_workflow(sourcetype):
                 thecommand.append("--glmsourcefile=" + glmname)
 
             # put in the rapidtide options
-            #for theopt in rapidtideopts:
-                #splitopt = theopt.split()
-                #thecommand.extend(splitopt)
+            # for theopt in rapidtideopts:
+            # splitopt = theopt.split()
+            # thecommand.extend(splitopt)
             thecommand += rapidtideopts
 
             # before submitting the job, check to see if output file exists
-            if sourcetype=="psusleep":
+            if sourcetype == "psusleep":
                 if thetype == "sleep":
                     endpoint = 428
                 else:
                     endpoint = 285
-            elif sourcetype=="recig":
+            elif sourcetype == "recig":
                 if thetype == "resting":
                     endpoint = 499
                 else:
                     endpoint = 427
-            elif sourcetype=="HCP":
+            elif sourcetype == "HCP":
                 endpoint = 1199
             else:
                 endpoint = 100
             numpoints = endpoint - args.startpoint + 1
             pointspersection = numpoints // args.numsections
-            print(f"dividing timecourse into {args.numsections} sections of {pointspersection} points")
+            print(
+                f"dividing timecourse into {args.numsections} sections of {pointspersection} points"
+            )
             for section in range(args.numsections):
                 sectionname = f"{section + 1}-of-{args.numsections}"
                 secstart = args.startpoint + section * pointspersection
@@ -380,9 +366,11 @@ def splitrapidtide_workflow(sourcetype):
                         dothis = True
                 else:
                     dothis = True
-    
+
                 thiscommand = thecommand + [f"--timerange {inputrange}", outputname]
-                scriptfile, thescript = micutil.make_runscript(thiscommand, timelimit="0:60:00", ncpus=args.ncpus)
+                scriptfile, thescript = micutil.make_runscript(
+                    thiscommand, timelimit="0:60:00", ncpus=args.ncpus
+                )
                 if dothis:
                     if args.doforreal:
                         if SYSTYPE == "sge":

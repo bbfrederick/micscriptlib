@@ -15,6 +15,7 @@ import micscriptlib.util as micutil
 
 fslmeantscmd = os.path.join(os.environ["FSLDIR"], "bin", "fslmeants")
 
+
 def _get_parser():
     # get the command line parameters
     parser = argparse.ArgumentParser(
@@ -117,7 +118,7 @@ def extractgms_workflow(sourcetype):
         thetypes = ["REST1", "REST2"]
 
     SYSTYPE, SUBMITTER, SINGULARITY = micutil.getbatchinfo()
-    
+
     if args.debug:
         print(f"sourcetype is {sourcetype}")
         print(f"\t{inputroot=}")
@@ -127,7 +128,6 @@ def extractgms_workflow(sourcetype):
         print(f"\t{SYSTYPE=}")
         print(f"\t{SUBMITTER=}")
         print(f"\t{SINGULARITY=}")
-
 
     # loop over all run types
     for thetype in thetypes:
@@ -177,36 +177,28 @@ def extractgms_workflow(sourcetype):
                 absname, thesubj, therun, pedir = micutil.parseconnectomename(
                     thefile, volumeproc=args.volumeproc
                 )
-                outroot = os.path.join(
-                    thesubj,
-                    thesubj
-                    + "_"
-                    + thetype
-                    + "_"
-                    + pedir
-                )
+                outroot = os.path.join(thesubj, thesubj + "_" + thetype + "_" + pedir)
                 maskname = os.path.join(therundir, "brainmask_fs.2.nii.gz")
             elif sourcetype == "psusleep":
-                absname, thefmrifilename, thesubj, thesess, therun, pedir, thetask, thespace = micutil.parsebidsname(thefile)
+                (
+                    absname,
+                    thefmrifilename,
+                    thesubj,
+                    thesess,
+                    therun,
+                    pedir,
+                    thetask,
+                    thespace,
+                ) = micutil.parsebidsname(thefile)
                 thesubj = f"sub-{thesubj}"
                 thetask = f"task-{thetask}"
-                outroot = os.path.join(
-                    thesubj,
-                    thesubj
-                    + "_"
-                    + thetask
-                )
+                outroot = os.path.join(thesubj, thesubj + "_" + thetask)
                 maskname = thefile.replace("desc-smoothAROMAnonaggr_bold", "res-2_desc-brain_mask")
             elif sourcetype == "recig":
                 absname, thesubj, therun, pedir = micutil.parseconnectomename(
                     thefile, volumeproc=args.volumeproc
                 )
-                outroot = os.path.join(
-                    thesubj,
-                    thesubj
-                    + "_"
-                    + thetype
-                )
+                outroot = os.path.join(thesubj, thesubj + "_" + thetype)
                 maskname = thefile.replace("bold", "mask")
             else:
                 print("illegal sourcetype")
@@ -222,7 +214,9 @@ def extractgms_workflow(sourcetype):
 
             thecommand = []
             fmrifile = absname
-            fixfile = os.path.join(therundir, thefmrifile[:-7] + "_hp2000_clean.nii.gz").replace("preproc", "fixextended")
+            fixfile = os.path.join(therundir, thefmrifile[:-7] + "_hp2000_clean.nii.gz").replace(
+                "preproc", "fixextended"
+            )
             thecommand.append(fslmeantscmd)
             thecommand.append("-i")
             if args.dofix:
@@ -248,7 +242,9 @@ def extractgms_workflow(sourcetype):
 
             thiscommand = thecommand + ["-o"]
             thiscommand.append(fulloutputname)
-            scriptfile, thescript = micutil.make_runscript(thiscommand, ncpus=1, jobname="extractgms")
+            scriptfile, thescript = micutil.make_runscript(
+                thiscommand, ncpus=1, jobname="extractgms"
+            )
             if dothis:
                 if args.doforreal:
                     if SYSTYPE == "sge":
