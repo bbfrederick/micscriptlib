@@ -7,9 +7,13 @@
 from __future__ import print_function
 
 import argparse
+import glob
+import operator
 import os
 import subprocess
 import sys
+import time
+
 import micscriptlib.util as micutil
 
 QSUB = "/cm/shared/apps/sge/2011.11p1/bin/linux-x64/qsub"
@@ -25,12 +29,14 @@ else:
 
 
 # file locations
-sourcetype = "HCP"
-
-outputroot = "/data/frederic/connectome"
+sourcetype = "psusleep"
+outputroot = f"/data/frederic/{sourcetype}/derivatives"
 if sourcetype == "cole":
     connectomeroot = "/data/ckorponay/New_HCP_Cleaned_TomMethod"
-    theoutputdir = os.path.join(outputroot, "splitanalysis", "outputtom")
+    theoutputdir = os.path.join(outputroot, "splitanalysis", "output")
+elif sourcetype == "psusleep":
+    connectomeroot = "/data/ckorponay/Sleep/fmriprep"
+    theoutputdir = os.path.join(outputroot, "splitanalysis", "output")
 else:
     connectomeroot = "/data2/HCP1200"
     theoutputdir = os.path.join(outputroot, "splitanalysis", "output")
@@ -50,8 +56,16 @@ def _get_parser():
         metavar="NUMSECTIONS",
         type=int,
         action="store",
-        help="number of sections to split timecourse into (default is 2)",
-        default=2,
+        help="number of sections to split timecourse into (default is 4)",
+        default=4,
+    )
+    parser.add_argument(
+        "--task",
+        metavar="TASK",
+        type=str,
+        action="store",
+        help="task to process (default is rest)",
+        default="rest",
     )
     parser.add_argument(
         "--startpoint",
@@ -59,7 +73,7 @@ def _get_parser():
         type=int,
         action="store",
         help="first TR to use (default is 20)",
-        default=20,
+        default=29,
     )
     parser.add_argument(
         "--ncpus",
@@ -200,17 +214,31 @@ def main():
     )
 
     # only run resting state 1 for the time being
-    thetypes = rest1runs
+    thetypes = ["cue1", "cue2", "cue3", "cue4", "cue5", "resting"]
+    thetypes = ["rest", "sleep"]
 
     # loop over all run types
     for thetype in thetypes:
         # special options depending on whether using volume or grayordinate files
+        print(f"sourcetype is {sourcetype}")
         if sourcetype == "cole":
             theboldfiles = micutil.findboldfiles_cole(
                 connectomeroot,
                 thetype,
                 args.volumeproc,
                 args.usefixforglm,
+                inputlistfile=args.inputlistfile,
+                debug=args.debug,
+            )
+        elif sourcetype == "psusleep":
+            theboldfiles = micutil.findboldfiles_psusleep(
+                thetype,
+                inputlistfile=args.inputlistfile,
+                debug=args.debug,
+            )
+        elif sourcetype == "recig":
+            theboldfiles = micutil.findboldfiles_recig(
+                thetype,
                 inputlistfile=args.inputlistfile,
                 debug=args.debug,
             )
@@ -228,12 +256,26 @@ def main():
             print("cannot initialize output root directory, exiting")
             sys.exit(1)
 
+
         for thefile in theboldfiles:
             if sourcetype == "cole":
                 absname, thesubj, therun, pedir = micutil.parsecolename(
                     thefile, volumeproc=args.volumeproc
                 )
                 print(f"{absname=}, {thesubj=}, {therun=}, {pedir=}")
+            elif sourcetype == "psusleep":
+                absname, thefmrifilename, thesubj, thesess, therun, pedir, thetask, thespace = micutil.parsebidsname(thefile)
+                thesubj = f"sub-{thesubj}"
+                thetask = f"sub-{thetask}"
+                if args.debug:
+                    print(f"{absname=}")
+                    print(f"{thefmrifilename=}")
+                    print(f"{thesubj=}")
+                    print(f"{thesess=}")
+                    print(f"{therun=}")
+                    print(f"{pedir=}")
+                    print(f"{thetask=}")
+                    print(f"{thespace=}")
             else:
                 absname, thesubj, therun, pedir = micutil.parseconnectomename(
                     thefile, volumeproc=args.volumeproc
@@ -257,43 +299,13 @@ def main():
                 print("doing unswapped run")
                 swapname = "_noswap_"
                 regressortouse = pedir
-            if args.volumeproc:
-                if args.isswapped:
-                    regressoropts = ["--regressor " + os.path.join(
-                        theoutputdir,
-                        thesubj,
-                        thesubj
-                        + "_"
-                        + thetype
-                        + "_noswap_"
-                        + regressortouse
-                        + outputnamesuffix
-                        + extrasuffix
-                        + "_reference_fmrires_pass3.txt",
-                    )]
-                else:
-                    regressoropts = ["--passes 3"]
-            else:
-                regressoropts = ["--regressor " + os.path.join(
-                    theoutputdir,
-                    thesubj,
-                    thesubj
-                    + "_"
-                    + thetype
-                    + "_noswap_"
-                    + regressortouse
-                    + outputnamesuffix
-                    + extrasuffix
-                    + "_reference_fmrires_pass3.txt",
-                )]
+            regressoropts = ["--passes 3"]
 
             outroot = os.path.join(
                 thesubj,
                 thesubj
                 + "_"
                 + thetype
-                + swapname
-                + pedir
                 + outputnamesuffix
                 + extrasuffix,
             )
@@ -301,7 +313,7 @@ def main():
             fmrifile = absname
             thecommand.append(rapidtidecmd)
             thecommand.append(fmrifile)
-            if args.usefixforglm and (thetype.find("REST") >= 0) and (sourcetype != "cole"):
+            if args.usefixforglm and (thetype.find("REST") >= 0) and (sourcetype == "HCP"):
                 cleanspec = "_hp2000_clean"
                 # glmname = os.path.join(therundir, thefmrifile[:-7] + '_hp2000_clean.nii.gz')
                 glmname = os.path.join(
@@ -319,16 +331,11 @@ def main():
             #thecommand.extend(regressoropts.split())
             thecommand += regressoropts
 
-            # oversample to ~1.0s TR
-            osfac = 1
-            thetr = 0.72
-            while thetr / osfac > 0.7:
-                osfac *= 2
-            if osfac > 2:
-                thecommand.extend(["-O", str(osfac)])
-
             # before submitting the job, check to see if output file exists
-            endpoint = 1199
+            if thetype == "sleep":
+                endpoint = 428
+            else:
+                endpoint = 285
             numpoints = endpoint - args.startpoint + 1
             pointspersection = numpoints // args.numsections
             print(f"dividing timecourse into {args.numsections} sections of {pointspersection} points")
@@ -350,7 +357,7 @@ def main():
                     dothis = True
     
                 thiscommand = thecommand + [f"--timerange {inputrange}", outputname]
-                scriptfile, thescript = micutil.make_runscript(thiscommand)
+                scriptfile, thescript = micutil.make_runscript(thiscommand, timelimit="0:60:00", ncpus=args.ncpus)
                 if dothis:
                     if args.doforreal:
                         if SYSTYPE == "sge":
