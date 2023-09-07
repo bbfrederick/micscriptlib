@@ -28,11 +28,13 @@ with open(path.join(here, "VERSION"), "w", encoding="utf-8") as f:
 
 modules_list = [
     "micscriptlib/util",
-    "micscriptlib/util2",
+    "micscriptlib/extractgms",
+    "micscriptlib/splitrapidtide",
 ]
 
 script_list = [
-    "micscriptlib/scripts/splitrapidtide",
+    "micscriptlib/scripts/splitrapidtide_launcher",
+    "micscriptlib/scripts/extractgms_launcher",
 ]
 
 setup(

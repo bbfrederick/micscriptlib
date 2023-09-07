@@ -7,12 +7,10 @@
 from __future__ import print_function
 
 import argparse
-import glob
-import operator
 import os
 import subprocess
 import sys
-import time
+
 import micscriptlib.util as micutil
 
 
@@ -151,7 +149,6 @@ def splitrapidtide_workflow(sourcetype):
         theoutputdir = os.path.join(outputroot, "gms")
         rest1runs = ["rfMRI_REST1"]
         rest2runs = ["rfMRI_REST2"]
-        restruns = rest1runs + rest2runs
         emotionruns = ["tfMRI_EMOTION"]
         gamblingruns = ["tfMRI_GAMBLING"]
         languageruns = ["tfMRI_LANGUAGE"]
@@ -168,8 +165,10 @@ def splitrapidtide_workflow(sourcetype):
             + relationalruns
             + socialruns
             + wmruns
+            + rest1runs
+            + rest2runs
         )
-
+    rapidtidecmd = "/cm/shared/anaconda3/envs/mic/bin/rapidtide"
     SYSTYPE, SUBMITTER, SINGULARITY = micutil.getbatchinfo()
     
     if args.debug:
@@ -182,11 +181,9 @@ def splitrapidtide_workflow(sourcetype):
         print(f"\t{SUBMITTER=}")
         print(f"\t{SINGULARITY=}")
 
-
     # make the appropriate output directory
     theoutputdir = f"{theoutputdir}_{args.numsections}"
 
-    #    "--nolimitoutput",
     rapidtideopts = [
         "--despecklepasses 4",
         "--filterfreqs 0.009 0.15",
@@ -200,6 +197,7 @@ def splitrapidtide_workflow(sourcetype):
         "--peakfittype gauss",
         "--noprogressbar",
         "--ampthresh 0.15",
+        "--nolimitoutput",
     ]
 
     # set options for volume vs surface
@@ -221,7 +219,7 @@ def splitrapidtide_workflow(sourcetype):
         print(f"sourcetype is {sourcetype}")
         if sourcetype == "cole":
             theboldfiles = micutil.findboldfiles_cole(
-                connectomeroot,
+                inputroot,
                 thetype,
                 args.volumeproc,
                 args.usefixforglm,
@@ -242,7 +240,7 @@ def splitrapidtide_workflow(sourcetype):
             )
         else:
             theboldfiles = micutil.findboldfiles_HCP(
-                connectomeroot,
+                inputroot,
                 thetype,
                 args.volumeproc,
                 args.usefixforglm,
