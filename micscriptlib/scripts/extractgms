@@ -13,18 +13,6 @@ import sys
 
 import micscriptlib.util as micutil
 
-# file locations
-sourcetype = "psusleep"
-outputroot = f"/data/frederic/{sourcetype}/derivatives"
-if sourcetype == "cole":
-    connectomeroot = "/data/ckorponay/New_HCP_Cleaned_TomMethod"
-    theoutputdir = os.path.join(outputroot, "gms")
-elif sourcetype == "psusleep":
-    connectomeroot = "/data/ckorponay/Sleep/fmriprep"
-    theoutputdir = os.path.join(outputroot, "gms")
-else:
-    connectomeroot = "/data2/HCP1200"
-    theoutputdir = os.path.join(outputroot, "gms")
 
 fslmeantscmd = os.path.join(os.environ["FSLDIR"], "bin", "fslmeants")
 
@@ -99,7 +87,7 @@ def _get_parser():
 ##########################################################################################
 
 
-def main():
+def extractgms_workflow(sourcetype):
     global theoutputdir
     try:
         args = _get_parser().parse_args()
@@ -110,22 +98,44 @@ def main():
     if args.debug:
         print(args)
 
-    # make the appropriate output directory
-    theoutputdir = f"{theoutputdir}_gms"
+    # file locations
+    outputroot = f"/data/frederic/{sourcetype}/derivatives"
+    if sourcetype == "cole":
+        inputroot = "/data/ckorponay/New_HCP_Cleaned_TomMethod"
+        theoutputdir = os.path.join(outputroot, "gms")
+        thetypes = ["REST1", "REST2"]
+    elif sourcetype == "psusleep":
+        inputroot = "/data/ckorponay/Sleep/fmriprep"
+        theoutputdir = os.path.join(outputroot, "gms")
+        thetypes = ["rest", "sleep"]
+    elif sourcetype == "recig":
+        inputroot = "/data/ajanes/REcig/fmri"
+        theoutputdir = os.path.join(outputroot, "gms")
+        thetypes = ["cue1", "cue2", "cue3", "cue4", "cue5", "resting"]
+    else:
+        inputroot = "/data2/HCP1200"
+        theoutputdir = os.path.join(outputroot, "gms")
+        thetypes = ["REST1", "REST2"]
 
     SYSTYPE, SUBMITTER, SINGULARITY = micutil.getbatchinfo()
+    
+    if args.debug:
+        print(f"sourcetype is {sourcetype}")
+        print(f"\t{inputroot=}")
+        print(f"\t{outputroot=}")
+        print(f"\t{theoutputdir=}")
+        print(f"\t{thetypes=}")
+        print(f"\t{SYSTYPE=}")
+        print(f"\t{SUBMITTER=}")
+        print(f"\t{SINGULARITY=}")
 
-    # only run resting state 1 for the time being
-    thetypes = ["cue1", "cue2", "cue3", "cue4", "cue5", "resting"]
-    thetypes = ["rest", "sleep"]
 
     # loop over all run types
     for thetype in thetypes:
         # find the bold files
-        print(f"sourcetype is {sourcetype}")
         if sourcetype == "cole":
             theboldfiles = micutil.findboldfiles_cole(
-                connectomeroot,
+                inputroot,
                 thetype,
                 args.volumeproc,
                 args.usefixforglm,
@@ -146,7 +156,7 @@ def main():
             )
         else:
             theboldfiles = micutil.findboldfiles_HCP(
-                connectomeroot,
+                inputroot,
                 thetype,
                 args.volumeproc,
                 args.usefixforglm,
@@ -159,9 +169,49 @@ def main():
             sys.exit(1)
 
         for thefile in theboldfiles:
-            absname, thesubj, therun, pedir = micutil.parseconnectomename(
-                thefile, volumeproc=args.volumeproc
-            )
+            if sourcetype == "cole":
+                absname, thesubj, therun, pedir = micutil.parseconnectomename(
+                    thefile, volumeproc=args.volumeproc
+                )
+                maskname = os.path.join(therundir, "brainmask_fs.2.nii.gz")
+            elif sourcetype == "HCP":
+                absname, thesubj, therun, pedir = micutil.parseconnectomename(
+                    thefile, volumeproc=args.volumeproc
+                )
+                outroot = os.path.join(
+                    thesubj,
+                    thesubj
+                    + "_"
+                    + thetype
+                    + "_"
+                    + pedir
+                )
+                maskname = os.path.join(therundir, "brainmask_fs.2.nii.gz")
+            elif sourcetype == "psusleep":
+                absname, thefmrifilename, thesubj, thesess, therun, pedir, thetask, thespace = micutil.parsebidsname(thefile)
+                thesubj = f"sub-{thesubj}"
+                thetask = f"task-{thetask}"
+                outroot = os.path.join(
+                    thesubj,
+                    thesubj
+                    + "_"
+                    + thetask
+                )
+                maskname = thefile.replace("desc-smoothAROMAnonaggr_bold", "res-2_desc-brain_mask")
+            elif sourcetype == "recig":
+                absname, thesubj, therun, pedir = micutil.parseconnectomename(
+                    thefile, volumeproc=args.volumeproc
+                )
+                outroot = os.path.join(
+                    thesubj,
+                    thesubj
+                    + "_"
+                    + thetype
+                )
+                maskname = thefile.replace("bold", "mask")
+            else:
+                print("illegal sourcetype")
+                sys.exit()
             absname = os.path.abspath(thefile)
             therundir, thefmrifile = os.path.split(absname)
             theresultsdir, therun = os.path.split(therundir)
@@ -171,14 +221,6 @@ def main():
 
             print("thefmrifile is", thefmrifile)
 
-            outroot = os.path.join(
-                thesubj,
-                thesubj
-                + "_"
-                + thetype
-                + "_"
-                + pedir
-            )
             thecommand = []
             fmrifile = absname
             fixfile = os.path.join(therundir, thefmrifile[:-7] + "_hp2000_clean.nii.gz").replace("preproc", "fixextended")
@@ -188,10 +230,12 @@ def main():
                 thecommand.append(fixfile)
             else:
                 thecommand.append(fmrifile)
-            thecommand.append("-m")
-            thecommand.append(os.path.join(therundir, "brainmask_fs.2.nii.gz"))
 
-            fulloutputname = f"{os.path.join(theoutputdir, outroot)}.txt"
+            # add the mask line
+            thecommand.append("-m")
+            thecommand.append(maskname)
+
+            fulloutputname = f"{os.path.join(theoutputdir, outroot)}_GMS.txt"
             dothis = False
             if args.existcheck:
                 if os.path.isfile(fulloutputname):
@@ -205,7 +249,7 @@ def main():
 
             thiscommand = thecommand + ["-o"]
             thiscommand.append(fulloutputname)
-            scriptfile, thescript = micutil.make_runscript(thiscommand)
+            scriptfile, thescript = micutil.make_runscript(thiscommand, ncpus=1, jobname="extractgms")
             if dothis:
                 if args.doforreal:
                     if SYSTYPE == "sge":
@@ -254,4 +298,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    extractgms_workflow("psusleep")
