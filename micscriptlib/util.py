@@ -162,6 +162,9 @@ def fingerprintapply(
     template="lag",
     limittomask=False,
     nointercept=None,
+    cluster=False,
+    fake=False,
+    waitfor=None,
     debug=False,
 ):
     fingerprintcmd = []
@@ -183,6 +186,7 @@ def fingerprintapply(
         fingerprintcmd += ["--extramask", extramask]
     pidnum = runcmd(fingerprintcmd, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
     return pidnum
+
 
 def atlasaverageapply(
     inputfile,
