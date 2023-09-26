@@ -54,6 +54,7 @@ def make_runscript(thecommand, jobname="rapidtide", ncpus=8, timelimit="0:30:00"
 
 
 atlasaveragecommand = "/cm/shared/anaconda3/envs/mic/bin/atlasaverage"
+fingerprintcommand = "/cm/shared/anaconda3/envs/mic/bin/fingerprint"
 fsldir = os.environ.get("FSLDIR")
 if fsldir is not None:
     fslsubcmd = os.path.join(fsldir, "bin", "fsl_sub")
@@ -150,12 +151,48 @@ def antsapply(
     return pidnum
 
 
+def fingerprintapply(
+    inputfile,
+    outputfileroot,
+    includemask=None,
+    excludemask=None,
+    extramask=None,
+    atlas="JHU1",
+    fitorder=1,
+    template="lag",
+    limittomask=False,
+    nointercept=None,
+    debug=False,
+):
+    fingerprintcmd = []
+    fingerprintcmd += [atlasaveragecommand]
+    fingerprintcmd += [inputfile]
+    fingerprintcmd += [outputfileroot]
+    fingerprintcmd += ["--atlas", atlas]
+    fingerprintcmd += ["--fitorder", str(fitorder)]
+    fingerprintcmd += ["--template", template]
+    if limittomask:
+        fingerprintcmd += ["--limittomask"]
+    if nointercept:
+        fingerprintcmd += ["--nointercept"]
+    if includemask is not None:
+        fingerprintcmd += ["--includemask", includemask]
+    if excludemask is not None:
+        fingerprintcmd += ["--excludemask", excludemask]
+    if extramask is not None:
+        fingerprintcmd += ["--extramask", extramask]
+    pidnum = runcmd(fingerprintcmd, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
+    return pidnum
+
 def atlasaverageapply(
     inputfile,
     templatefile,
     outputfileroot,
     regionlist=None,
     label=None,
+    includemask=None,
+    excludemask=None,
+    extramask=None,
     nozero=False,
     header=False,
     cluster=False,
@@ -176,6 +213,12 @@ def atlasaverageapply(
         atlasavgcmd += ["--datalabel", label]
     if regionlist is not None:
         atlasavgcmd += ["--regionlistfile", regionlist]
+    if includemask is not None:
+        atlasavgcmd += ["--includemask", includemask]
+    if excludemask is not None:
+        atlasavgcmd += ["--excludemask", excludemask]
+    if extramask is not None:
+        atlasavgcmd += ["--extramask", extramask]
     pidnum = runcmd(atlasavgcmd, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
     return pidnum
 
