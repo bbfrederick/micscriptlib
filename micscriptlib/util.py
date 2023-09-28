@@ -68,7 +68,11 @@ else:
 def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debug=False):
     SYSTYPE, SUBMITTER, SINGULARITY = getbatchinfo()
     if debug:
-        print(thecmd)
+        print("RUNCMD:", thecmd)
+        print(f"\t{cluster=}")
+        print(f"\t{readable=}")
+        print(f"\t{fake=}")
+        print(f"\t{waitfor=}")
     if fake:
         if readable:
             print(thecmd[0])
