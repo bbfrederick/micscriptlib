@@ -195,11 +195,14 @@ def extractgms_workflow(sourcetype):
                 outroot = os.path.join(thesubj, thesubj + "_" + thetask)
                 maskname = thefile.replace("desc-smoothAROMAnonaggr_bold", "res-2_desc-brain_mask")
             elif sourcetype == "recig":
-                absname, thesubj, therun, pedir = micutil.parseconnectomename(
-                    thefile, volumeproc=args.volumeproc
-                )
-                outroot = os.path.join(thesubj, thesubj + "_" + thetype)
-                maskname = thefile.replace("bold", "mask")
+                absname, thefilename, thesubj, thesess, thetask = micutil.parserecigname(thefile)
+                thesubj = f"sub-{thesubj}"
+                thesess = f"ses-{thesess}"
+                thetask = f"task-{thetask}"
+                if args.debug:
+                    print(f"{thesubj=}, {thesess=}, {thetask=}")
+                outroot = os.path.join(thesubj, "_".join([thesubj, thesess, thetask]))
+                maskname = thefile.replace("filtered_func_data", "mask")
             else:
                 print("illegal sourcetype")
                 sys.exit()
