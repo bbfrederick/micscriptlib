@@ -1,15 +1,29 @@
 #!/usr/bin/env python
 #
-import argparse
 import glob
 import os
-import shutil
 import subprocess
 import sys
 from os.path import join as pjoin
 
 import rapidtide.io as tide_io
 
+pythonbindir = "/cm/shared/anaconda3/envs/mic/bin"
+
+fsldir = os.environ.get("FSLDIR")
+if fsldir is not None:
+    fslsubcmd = os.path.join(fsldir, "bin", "fsl_sub")
+    flirtcmd = os.path.join(fsldir, "bin", "flirt")
+    applywarpcmd = os.path.join(fsldir, "bin", "applywarp")
+    fslexists = True
+else:
+    fslexists = False
+
+antsdir = os.environ.get("ANTSDIR")
+if antsdir is not None:
+    antsexists = True
+else:
+    antsexists = False
 
 def getbatchinfo():
     QSUB = "/cm/shared/apps/sge/2011.11p1/bin/linux-x64/qsub"
@@ -51,18 +65,6 @@ def make_runscript(thecommand, jobname="rapidtide", ncpus=8, timelimit="0:30:00"
     with open(filename, "w") as fp:
         fp.write(script)
     return filename, script
-
-
-atlasaveragecommand = "/cm/shared/anaconda3/envs/mic/bin/atlasaverage"
-fingerprintcommand = "/cm/shared/anaconda3/envs/mic/bin/fingerprint"
-fsldir = os.environ.get("FSLDIR")
-if fsldir is not None:
-    fslsubcmd = os.path.join(fsldir, "bin", "fsl_sub")
-    flirtcmd = os.path.join(fsldir, "bin", "flirt")
-    applywarpcmd = os.path.join(fsldir, "bin", "applywarp")
-    fslexists = True
-else:
-    fslexists = False
 
 
 def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debug=False):
@@ -111,7 +113,7 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debu
 
 def mriconvert(inputfile, outputfile, cluster=False, fake=False, waitfor=None, debug=False):
     convcmd = []
-    convcmd += ["mri_convert"]
+    convcmd += [f"{antsdir}/bin/mri_convert"]
     convcmd += [inputfile]
     convcmd += [outputfile]
     pidnum = runcmd(convcmd, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
@@ -121,7 +123,7 @@ def mriconvert(inputfile, outputfile, cluster=False, fake=False, waitfor=None, d
 def n4correct(inputfile, outputdir, cluster=False, fake=False, waitfor=None, debug=False):
     thename, theext = tide_io.niftisplitext(inputfile)
     n4cmd = []
-    n4cmd += ["N4BiasFieldCorrection"]
+    n4cmd += [f"{antsdir}/bin/N4BiasFieldCorrection"]
     n4cmd += ["-d", "3"]
     n4cmd += ["-i", inputfile]
     n4cmd += ["-o", pjoin(outputdir, thename + "_n4" + theext)]
@@ -141,7 +143,7 @@ def antsapply(
     interp=None,
 ):
     applyxfmcmd = []
-    applyxfmcmd += ["/cm/shared/apps/ants-2.4.3/bin/antsApplyTransforms"]
+    applyxfmcmd += [f"{antsdir}/bin/antsApplyTransforms"]
     applyxfmcmd += ["--default-value", "0"]
     applyxfmcmd += ["-d", "3"]
     applyxfmcmd += ["-i", inputname]
@@ -172,7 +174,7 @@ def fingerprintapply(
     debug=False,
 ):
     fingerprintcmd = []
-    fingerprintcmd += [atlasaveragecommand]
+    fingerprintcmd += [f"{pythonbindir}/fingerprint"]
     fingerprintcmd += [inputfile]
     fingerprintcmd += [outputfileroot]
     fingerprintcmd += ["--atlas", atlas]
@@ -209,7 +211,7 @@ def atlasaverageapply(
     debug=False,
 ):
     atlasavgcmd = []
-    atlasavgcmd += [atlasaveragecommand]
+    atlasavgcmd += [f"{pythonbindir}/atlasaverage"]
     atlasavgcmd += [inputfile]
     atlasavgcmd += [templatefile]
     atlasavgcmd += [outputfileroot]
