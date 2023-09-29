@@ -113,7 +113,7 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debu
 
 def mriconvert(inputfile, outputfile, cluster=False, fake=False, waitfor=None, debug=False):
     convcmd = []
-    convcmd += [f"{antsdir}/bin/mri_convert"]
+    convcmd += [f"{antsdir}/mri_convert"]
     convcmd += [inputfile]
     convcmd += [outputfile]
     pidnum = runcmd(convcmd, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
@@ -123,7 +123,7 @@ def mriconvert(inputfile, outputfile, cluster=False, fake=False, waitfor=None, d
 def n4correct(inputfile, outputdir, cluster=False, fake=False, waitfor=None, debug=False):
     thename, theext = tide_io.niftisplitext(inputfile)
     n4cmd = []
-    n4cmd += [f"{antsdir}/bin/N4BiasFieldCorrection"]
+    n4cmd += [f"{antsdir}/N4BiasFieldCorrection"]
     n4cmd += ["-d", "3"]
     n4cmd += ["-i", inputfile]
     n4cmd += ["-o", pjoin(outputdir, thename + "_n4" + theext)]
@@ -143,7 +143,7 @@ def antsapply(
     interp=None,
 ):
     applyxfmcmd = []
-    applyxfmcmd += [f"{antsdir}/bin/antsApplyTransforms"]
+    applyxfmcmd += [f"{antsdir}/antsApplyTransforms"]
     applyxfmcmd += ["--default-value", "0"]
     applyxfmcmd += ["-d", "3"]
     applyxfmcmd += ["-i", inputname]
