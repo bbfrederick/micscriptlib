@@ -35,6 +35,8 @@ modules_list = [
 script_list = [
     "micscriptlib/scripts/splitrapidtide_launcher",
     "micscriptlib/scripts/extractgms_launcher",
+    "micscriptlib/extractrtvals",
+    "micscriptlib/vasc_extractrtvals",
 ]
 
 setup(

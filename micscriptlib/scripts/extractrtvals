@@ -1,0 +1,175 @@
+#!/usr/bin/env python
+#
+#       $Author: frederic $
+#       $Date: 2015/03/06 14:12:29 $
+#       $Id: preprocess_spo2.py,v 1.1 2015/03/06 14:12:29 frederic Exp $
+#
+from __future__ import print_function
+
+import argparse
+import glob
+import operator
+import os
+import shutil
+import subprocess
+import sys
+import time
+from os.path import join as pjoin
+
+import micscriptlib.util as micutil
+
+
+def findrtfiles(theroot, themaptype, inputlistfile=None, debug=False):
+    if inputlistfile is None:
+        searchstring = os.path.join(
+            theroot,
+            "sub-*",
+            "ses-*",
+            f"*_desc-{themaptype}_map.nii.gz",
+        )
+        if debug:
+            print("searchstring:", searchstring)
+        return glob.glob(searchstring)
+    else:
+        print("using subject list")
+        inputlist = micutil.readlist(inputlistfile)
+        print("subject list is ", inputlist)
+        retlist = []
+        for subject in inputlist:
+            searchstring = os.path.join(
+                theroot,
+                f"sub-OAS{subject}",
+                "ses-*",
+                f"*_desc-{themaptype}_map.nii.gz",
+            )
+            if debug:
+                print("searchstring:", searchstring)
+            retlist.append(glob.glob(searchstring))
+        return [val for sublist in retlist for val in sublist]
+
+
+def _get_parser():
+    # get the command line parameters
+    parser = argparse.ArgumentParser(
+        prog="extractrtvals",
+        description="extracts and averages rapidtide values based on the subject's freesurfer parcellation",
+        usage="%(prog)s",
+    )
+    parser.add_argument(
+        "--inputlist",
+        metavar="INPUTLIST",
+        type=str,
+        action="store",
+        dest="inputlistfile",
+        help="read a list of subjects to analyze (default is to run all subjects)",
+        default=None,
+    )
+    parser.add_argument(
+        "--noexistcheck",
+        action="store_false",
+        dest="existcheck",
+        help="just print out the commands that will be executed rather than running them",
+        default=True,
+    )
+    parser.add_argument(
+        "--fake",
+        action="store_false",
+        dest="doforreal",
+        help="just print out the commands that will be executed rather than running them",
+        default=True,
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        dest="debug",
+        help="output extra debugging information",
+        default=False,
+    )
+    return parser
+
+
+##########################################################################################
+##########################################################################################
+#
+# control flow starts here
+#
+
+##########################################################################################
+
+
+def main():
+    theoutputdir = "/data/frederic/tofrapidtide/derivatives/freesurferparc"
+    try:
+        args = _get_parser().parse_args()
+    except SystemExit:
+        _get_parser().print_help()
+        raise
+
+    if args.debug:
+        print(args)
+
+    # define some globals
+    qspec = ""
+
+    for themaptype in ["maxtime", "maxcorr"]:
+        theboldfiles = micutil.findrtfiles(
+            "/data/saslan/R21_OASIS_completesubjectlist",
+            themaptype,
+            inputlistfile=args.inputlistfile,
+            debug=args.debug,
+        )
+        if args.debug:
+            print("boldfiles:")
+            print(theboldfiles)
+    
+        if not micutil.makeadir(theoutputdir):
+            print("cannot initialize output root directory, exiting")
+            sys.exit(1)
+ 
+        for thefile in theboldfiles:
+            absname, thesubj, thesess, therun = micutil.parsertname(thefile, debug=args.debug)
+            thesubj = thesubj
+            thesess = thesess
+            therun = therun
+            absname = os.path.abspath(thefile)
+            anatdir = f"/home/frederic/OMG/OASIS/derivatives/fmriprep/{thesubj}/anat"
+
+            # make the outputdirectory
+            if not micutil.makeadir(os.path.join(theoutputdir, thesubj)):
+                print("cannot initialize subject directory, exiting")
+                sys.exit(1)
+
+            # get the parcellation file
+            MNIaparcasegname = f"{thesubj}_space-MNI152NLin6Asym_res-2_desc-aparcaseg_dseg.nii.gz"
+            parcellationfile = os.path.join(anatdir, MNIaparcasegname)
+
+            # get the masks
+            theextramask = thefile.replace("maxtime_map", "corrfit_mask").replace("maxcorr_map", "corrfit_mask")
+            theincludemask = None
+
+            # average over regions
+            summaryfileroot = os.path.join(
+                theoutputdir, thesubj, f"{thesubj}_{thesess}_{therun}_space-MNI152NLin6Asym_desc-{themaptype}_freesurferaverage"
+            )
+            thedatalabel = "_".join([thesubj, thesess, therun, themaptype])
+            regionlistfile = "/data/frederic/tofrapidtide/code/regionlist"
+            if not args.existcheck or (not os.path.isfile(summaryfileroot + "_regionsummaries.csv")):
+                print(f"{summaryfileroot}_regionsummaries.csv does not exist - generating")
+                micutil.atlasaverageapply(thefile,
+                                parcellationfile,
+                                summaryfileroot,
+                                regionlist=regionlistfile,
+                                label=thedatalabel,
+                                nozero=True,
+                                extramask=theextramask,
+                                includemask=theincludemask,
+                                cluster=False,
+                                header=True,
+                                fake=(not args.doforreal),
+                                debug=args.debug)
+            else:
+                print(f"{summaryfileroot}_regionsummaries.csv exists - skipping")
+   
+    
+if __name__ == "__main__":
+    main()
