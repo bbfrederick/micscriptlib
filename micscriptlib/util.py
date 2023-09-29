@@ -25,6 +25,7 @@ if antsdir is not None:
 else:
     antsexists = False
 
+
 def getbatchinfo():
     QSUB = "/cm/shared/apps/sge/2011.11p1/bin/linux-x64/qsub"
     SBATCH = "/cm/shared/apps/slurm/current/bin/sbatch"
@@ -654,3 +655,23 @@ def findrtfiles(theroot, themaptype, inputlistfile=None, debug=False):
                 print("searchstring:", searchstring)
             retlist.append(glob.glob(searchstring))
         return [val for sublist in retlist for val in sublist]
+
+
+def findreferencedir():
+    # Get the list of directories
+    site_packages_dirs = site.getsitepackages()
+
+    # Find the "site-packages" directory in the list
+    for dir in site_packages_dirs:
+        if dir.endswith("site-packages"):
+            sitepackages_dir = dir
+            break
+        else:
+            sitepackages_dir = None
+    referencedir = os.path.join(
+        sitepackages_dir,
+        "rapidtide",
+        "data",
+        "reference",
+    )
+    return referencedir
