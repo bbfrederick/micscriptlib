@@ -658,7 +658,7 @@ def findrtfiles(theroot, themaptype, inputlistfile=None, debug=False):
         return [val for sublist in retlist for val in sublist]
 
 
-def findreferencedir():
+def finddatadir():
     # Get the list of directories
     site_packages_dirs = site.getsitepackages()
 
