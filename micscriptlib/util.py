@@ -671,8 +671,7 @@ def findreferencedir():
             sitepackages_dir = None
     referencedir = os.path.join(
         sitepackages_dir,
-        "rapidtide",
+        "micscriptlib",
         "data",
-        "reference",
     )
     return referencedir
