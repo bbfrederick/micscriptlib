@@ -2,6 +2,7 @@
 #
 import glob
 import os
+import site
 import subprocess
 import sys
 from os.path import join as pjoin
