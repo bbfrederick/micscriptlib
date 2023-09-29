@@ -1,5 +1,5 @@
 recursive-include micscriptlib *.py
-recursive-include micscriptlib/scripts *
-recursive-include micscriptlib/data *
+include micscriptlib/scripts/*
+include micscriptlib/data/*
 include versioneer.py
 include micscriptlib/_version.py

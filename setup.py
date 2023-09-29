@@ -117,7 +117,11 @@ setup(
     # have to be included in MANIFEST.in as well.
     include_package_data=True,
     zip_safe=False,
-    package_data={},
+    package_data={
+        "data": [
+            "data/*",
+        ],
+    },
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow
     # pip to create the appropriate form of executable for the target platform.
