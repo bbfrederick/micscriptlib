@@ -1,5 +1,6 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ['setuptools', 'wheel', 'versioneer[toml]']
+build-backend = 'setuptools.build_meta'
 
 [project]
 name = 'micscriptlib'
@@ -24,19 +25,6 @@ dependencies = [
   'rapidtide',
 ]
 dynamic = ['version']
-
-[tool.versioneer]
-VCS = "git"
-style = "pep440"
-versionfile_source = "micscriptlib/_version.py"
-versionfile_build = "micscriptlib/_version.py"
-tag_prefix = ""
-parentdir_prefix = "micscriptlib-"
-
-
-[tool.isort]
-profile = "black"
-multi_line_output = 3
 
 [tool.setuptools]
 include-package-data = true
@@ -72,3 +60,15 @@ exclude = '''
   | micscriptlib/_version.py
 )
 '''
+
+[tool.isort]
+profile = 'black'
+multi_line_output = 3
+
+[tool.versioneer]
+VCS = 'git'
+style = 'pep440'
+versionfile_source = 'micscriptlib/_version.py'
+versionfile_build = 'micscriptlib/_version.py'
+tag_prefix = 'v'
+parentdir_prefix = 'micscriptlib-'
