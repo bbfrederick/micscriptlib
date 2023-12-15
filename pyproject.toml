@@ -24,10 +24,10 @@ requires-python = '>=3.8'
 dependencies = [
   'rapidtide',
 ]
-dynamic = ['version']
+dynamic = ['version', 'license', 'keywords']
 
 [tool.setuptools]
-include-package-data = true
+include-package-data = false
 
 [tool.setuptools.packages.find]
 include = ['micscriptlib']
