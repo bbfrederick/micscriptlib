@@ -196,6 +196,18 @@ def fingerprintapply(
     return pidnum
 
 
+def runqualitycheckapply(
+    inputfileroot,
+    cluster=False,
+    waitfor=None,
+    debug=False,
+):
+    runqualcmd = []
+    runqualcmd += [f"{pythonbindir}/runqualitycheck"]
+    runqualcmd += [inputfileroot]
+    pidnum = runcmd(runqualcmd, cluster=cluster, waitfor=waitfor, debug=debug)
+    return pidnum
+
 def atlasaverageapply(
     inputfile,
     templatefile,
