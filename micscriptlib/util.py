@@ -209,9 +209,9 @@ def runqualitycheckapply(
     runqualcmd += [f"{pythonbindir}/runqualitycheck"]
     runqualcmd += [inputfileroot]
     if grayfile is not None:
-        fingerprintcmd += ["--grayfile", grayfile]
+        runqualcmd += ["--grayfile", grayfile]
     if whitefile is not None:
-        fingerprintcmd += ["--whitefile", whitefile]
+        runqualcmd += ["--whitefile", whitefile]
     pidnum = runcmd(runqualcmd, cluster=cluster, waitfor=waitfor, fake=fake, debug=debug)
     return pidnum
 
