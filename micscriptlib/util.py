@@ -198,6 +198,8 @@ def fingerprintapply(
 
 def runqualitycheckapply(
     inputfileroot,
+    grayfile=None,
+    whitefile=None,
     cluster=False,
     fake=False,
     waitfor=None,
@@ -206,6 +208,10 @@ def runqualitycheckapply(
     runqualcmd = []
     runqualcmd += [f"{pythonbindir}/runqualitycheck"]
     runqualcmd += [inputfileroot]
+    if grayfile is not None:
+        fingerprintcmd += ["--grayfile", grayfile]
+    if whitefile is not None:
+        fingerprintcmd += ["--whitefile", whitefile]
     pidnum = runcmd(runqualcmd, cluster=cluster, waitfor=waitfor, fake=fake, debug=debug)
     return pidnum
 
