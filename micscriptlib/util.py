@@ -41,7 +41,7 @@ def getbatchinfo():
     return SYSTYPE, SUBMITTER, SINGULARITY
 
 
-def make_runscript(thecommand, jobname="rapidtide", ncpus=8, timelimit="0:30:00", mem="16G"):
+def make_runscript(thecommand, jobname="rapidtide", ncpus=8, timelimit="0:02:00", mem="1G"):
     """
     Create a temporary script file we can submit to qsub.
     """
@@ -69,7 +69,7 @@ def make_runscript(thecommand, jobname="rapidtide", ncpus=8, timelimit="0:30:00"
     return filename, script
 
 
-def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debug=False):
+def runcmd(thecmd, timelimit="0:02:00", mem="1G", cluster=False, readable=False, fake=False, waitfor=None, debug=False):
     SYSTYPE, SUBMITTER, SINGULARITY = getbatchinfo()
     if debug:
         print("RUNCMD:", thecmd)
@@ -77,18 +77,10 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debu
         print(f"\t{readable=}")
         print(f"\t{fake=}")
         print(f"\t{waitfor=}")
-    if fake:
-        if readable:
-            print(thecmd[0])
-            for thearg in thecmd[1:]:
-                print("\t", thearg)
-        else:
-            print(" ".join(thecmd))
-        print()
     else:
         if cluster:
             jobname = thecmd[0].split("/")[-1]
-            scriptfile, thescript = make_runscript(thecmd, jobname)
+            scriptfile, thescript = make_runscript(thecmd, jobname, timelimit=timelimit, mem=mem)
             waitstr = ""
             if SYSTYPE == "sge":
                 if waitfor is not None:
@@ -100,16 +92,30 @@ def runcmd(thecmd, cluster=False, readable=False, fake=False, waitfor=None, debu
                 sub_cmd = f"{SUBMITTER} {waitstr} {scriptfile}".split()
             if debug:
                 print("sub_cmd:", sub_cmd)
-            thereturn = subprocess.check_output(sub_cmd).split()
-            thepid = (thereturn[-1]).strip()
-            thepidstr = str(thepid, "UTF8")
-            if debug:
-                print("return value:", thereturn)
-                print("pid value:", thepid)
-                print("pidstr value:", thepidstr)
-            return str(thepidstr)
+            if fake:
+                print(sub_cmd)
+                subprocess.call(" ".join("cat", scriptfile))
+                return None
+            else:
+                thereturn = subprocess.check_output(sub_cmd).split()
+                thepid = (thereturn[-1]).strip()
+                thepidstr = str(thepid, "UTF8")
+                if debug:
+                    print("return value:", thereturn)
+                    print("pid value:", thepid)
+                    print("pidstr value:", thepidstr)
+                return str(thepidstr)
         else:
-            subprocess.call(thecmd)
+            if fake:
+                if readable:
+                    print(thecmd[0])
+                    for thearg in thecmd[1:]:
+                        print("\t", thearg)
+                else:
+                    print(" ".join(thecmd))
+                print()
+            else:
+                subprocess.call(thecmd)
             return None
 
 
@@ -118,7 +124,7 @@ def mriconvert(inputfile, outputfile, cluster=False, fake=False, waitfor=None, d
     convcmd += [f"{antsdir}/mri_convert"]
     convcmd += [inputfile]
     convcmd += [outputfile]
-    pidnum = runcmd(convcmd, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
+    pidnum = runcmd(convcmd, timelimit="0:02:00", mem="1G",cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
     return pidnum
 
 
@@ -129,7 +135,7 @@ def n4correct(inputfile, outputdir, cluster=False, fake=False, waitfor=None, deb
     n4cmd += ["-d", "3"]
     n4cmd += ["-i", inputfile]
     n4cmd += ["-o", pjoin(outputdir, thename + "_n4" + theext)]
-    pidnum = runcmd(n4cmd, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
+    pidnum = runcmd(n4cmd, timelimit="0:02:00", mem="1G",cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
     return pidnum
 
 
@@ -155,7 +161,7 @@ def antsapply(
         applyxfmcmd += ["--interpolation", interp]
     for thetransform in transforms:
         applyxfmcmd += ["--transform", thetransform]
-    pidnum = runcmd(applyxfmcmd, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
+    pidnum = runcmd(applyxfmcmd, timelimit="0:02:00", mem="1G",cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
     return pidnum
 
 
@@ -192,7 +198,7 @@ def fingerprintapply(
         fingerprintcmd += ["--excludemask", excludemask]
     if extramask is not None:
         fingerprintcmd += ["--extramask", extramask]
-    pidnum = runcmd(fingerprintcmd, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
+    pidnum = runcmd(fingerprintcmd, timelimit="0:02:00", mem="1G",cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
     return pidnum
 
 
@@ -212,7 +218,7 @@ def runqualitycheckapply(
         runqualcmd += ["--graymaskspec", graymaskspec]
     if whitemaskspec is not None:
         runqualcmd += ["--whitemaskspec", whitemaskspec]
-    pidnum = runcmd(runqualcmd, cluster=cluster, waitfor=waitfor, fake=fake, debug=debug)
+    pidnum = runcmd(runqualcmd, timelimit="0:02:00", mem="1G", cluster=cluster, waitfor=waitfor, fake=fake, debug=debug)
     return pidnum
 
 def atlasaverageapply(
@@ -250,7 +256,7 @@ def atlasaverageapply(
         atlasavgcmd += ["--excludemask", excludemask]
     if extramask is not None:
         atlasavgcmd += ["--extramask", extramask]
-    pidnum = runcmd(atlasavgcmd, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
+    pidnum = runcmd(atlasavgcmd, timelimit="0:02:00", mem="1G",cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
     return pidnum
 
 
