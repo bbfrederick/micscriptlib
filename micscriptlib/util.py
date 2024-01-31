@@ -94,7 +94,7 @@ def runcmd(thecmd, timelimit="0:02:00", mem="1G", cluster=False, readable=False,
                 print("sub_cmd:", sub_cmd)
             if fake:
                 print(sub_cmd)
-                subprocess.call(" ".join("cat", scriptfile))
+                subprocess.call(" ".join(["cat", scriptfile]))
                 return None
             else:
                 thereturn = subprocess.check_output(sub_cmd).split()
