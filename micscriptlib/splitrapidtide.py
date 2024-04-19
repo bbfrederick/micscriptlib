@@ -368,7 +368,10 @@ def splitrapidtide_workflow():
                 secstart = args.startpoint + section * pointspersection
                 secend = secstart + pointspersection - 1
                 inputrange = f"{secstart} {secend}"
-                outputname = f"{os.path.join(theoutputdir, outroot)}_{sectionname}"
+                if args.numsections == 1:
+                    outputname = f"{os.path.join(theoutputdir, outroot)}"
+                else:
+                    outputname = f"{os.path.join(theoutputdir, outroot)}_{sectionname}"
                 dothis = False
                 if args.existcheck:
                     if os.path.isfile(outputname + "_DONE.txt"):
