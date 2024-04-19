@@ -69,7 +69,17 @@ def make_runscript(thecommand, jobname="rapidtide", ncpus=8, timelimit="0:02:00"
     return filename, script
 
 
-def runcmd(thecmd, timelimit="0:02:00", mem="1G", ncpus=1, cluster=False, readable=False, fake=False, waitfor=None, debug=False):
+def runcmd(
+    thecmd,
+    timelimit="0:02:00",
+    mem="1G",
+    ncpus=1,
+    cluster=False,
+    readable=False,
+    fake=False,
+    waitfor=None,
+    debug=False,
+):
     SYSTYPE, SUBMITTER, SINGULARITY = getbatchinfo()
     if debug:
         print("RUNCMD:", thecmd)
@@ -80,7 +90,9 @@ def runcmd(thecmd, timelimit="0:02:00", mem="1G", ncpus=1, cluster=False, readab
     else:
         if cluster:
             jobname = thecmd[0].split("/")[-1]
-            scriptfile, thescript = make_runscript(thecmd, jobname, ncpus=ncpus, timelimit=timelimit, mem=mem)
+            scriptfile, thescript = make_runscript(
+                thecmd, jobname, ncpus=ncpus, timelimit=timelimit, mem=mem
+            )
             waitstr = ""
             if SYSTYPE == "sge":
                 if waitfor is not None:
@@ -124,7 +136,16 @@ def mriconvert(inputfile, outputfile, cluster=False, fake=False, waitfor=None, d
     convcmd += [f"{antsdir}/mri_convert"]
     convcmd += [inputfile]
     convcmd += [outputfile]
-    pidnum = runcmd(convcmd, timelimit="0:02:00", mem="1G", ncpus=1, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
+    pidnum = runcmd(
+        convcmd,
+        timelimit="0:02:00",
+        mem="1G",
+        ncpus=1,
+        cluster=cluster,
+        fake=fake,
+        waitfor=waitfor,
+        debug=debug,
+    )
     return pidnum
 
 
@@ -135,7 +156,16 @@ def n4correct(inputfile, outputdir, cluster=False, fake=False, waitfor=None, deb
     n4cmd += ["-d", "3"]
     n4cmd += ["-i", inputfile]
     n4cmd += ["-o", pjoin(outputdir, thename + "_n4" + theext)]
-    pidnum = runcmd(n4cmd, timelimit="0:02:00", mem="1G", ncpus=1, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
+    pidnum = runcmd(
+        n4cmd,
+        timelimit="0:02:00",
+        mem="1G",
+        ncpus=1,
+        cluster=cluster,
+        fake=fake,
+        waitfor=waitfor,
+        debug=debug,
+    )
     return pidnum
 
 
@@ -161,7 +191,16 @@ def antsapply(
         applyxfmcmd += ["--interpolation", interp]
     for thetransform in transforms:
         applyxfmcmd += ["--transform", thetransform]
-    pidnum = runcmd(applyxfmcmd, timelimit="0:02:00", mem="1G", ncpus=1, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
+    pidnum = runcmd(
+        applyxfmcmd,
+        timelimit="0:02:00",
+        mem="1G",
+        ncpus=1,
+        cluster=cluster,
+        fake=fake,
+        waitfor=waitfor,
+        debug=debug,
+    )
     return pidnum
 
 
@@ -198,7 +237,16 @@ def fingerprintapply(
         fingerprintcmd += ["--excludemask", excludemask]
     if extramask is not None:
         fingerprintcmd += ["--extramask", extramask]
-    pidnum = runcmd(fingerprintcmd, timelimit="0:02:00", mem="1G", ncpus=1, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
+    pidnum = runcmd(
+        fingerprintcmd,
+        timelimit="0:02:00",
+        mem="1G",
+        ncpus=1,
+        cluster=cluster,
+        fake=fake,
+        waitfor=waitfor,
+        debug=debug,
+    )
     return pidnum
 
 
@@ -218,8 +266,18 @@ def runqualitycheckapply(
         runqualcmd += ["--graymaskspec", graymaskspec]
     if whitemaskspec is not None:
         runqualcmd += ["--whitemaskspec", whitemaskspec]
-    pidnum = runcmd(runqualcmd, timelimit="0:02:00", mem="1G", ncpus=1, cluster=cluster, waitfor=waitfor, fake=fake, debug=debug)
+    pidnum = runcmd(
+        runqualcmd,
+        timelimit="0:02:00",
+        mem="1G",
+        ncpus=1,
+        cluster=cluster,
+        waitfor=waitfor,
+        fake=fake,
+        debug=debug,
+    )
     return pidnum
+
 
 def atlasaverageapply(
     inputfile,
@@ -256,7 +314,16 @@ def atlasaverageapply(
         atlasavgcmd += ["--excludemask", excludemask]
     if extramask is not None:
         atlasavgcmd += ["--extramask", extramask]
-    pidnum = runcmd(atlasavgcmd, timelimit="0:02:00", mem="1G", ncpus=1, cluster=cluster, fake=fake, waitfor=waitfor, debug=debug)
+    pidnum = runcmd(
+        atlasavgcmd,
+        timelimit="0:02:00",
+        mem="1G",
+        ncpus=1,
+        cluster=cluster,
+        fake=fake,
+        waitfor=waitfor,
+        debug=debug,
+    )
     return pidnum
 
 

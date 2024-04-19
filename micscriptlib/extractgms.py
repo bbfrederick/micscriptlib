@@ -4,8 +4,6 @@
 #       $Date: 2015/03/06 14:12:29 $
 #       $Id: preprocess_spo2.py,v 1.1 2015/03/06 14:12:29 frederic Exp $
 #
-from __future__ import print_function
-
 import argparse
 import os
 import subprocess

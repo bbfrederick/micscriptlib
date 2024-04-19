@@ -4,14 +4,18 @@
 #       $Date: 2015/03/06 14:12:29 $
 #       $Id: preprocess_spo2.py,v 1.1 2015/03/06 14:12:29 frederic Exp $
 #
-from __future__ import print_function
-
 import argparse
 import os
 import subprocess
 import sys
 
 import micscriptlib.util as micutil
+
+DEFAULT_NUMSECTIONS = 1
+DEFAULT_TASK = "rest"
+DEFAULT_STARTPOINT = 12
+DEFAULT_NCPUS = 8
+DEFAULT_SOURCETYPE = "HCP"
 
 
 def _get_parser():
@@ -26,32 +30,41 @@ def _get_parser():
         metavar="NUMSECTIONS",
         type=int,
         action="store",
-        help="number of sections to split timecourse into (default is 4)",
-        default=4,
+        help=f"number of sections to split timecourse into (default is {DEFAULT_NUMSECTIONS})",
+        default=DEFAULT_NUMSECTIONS,
     )
     parser.add_argument(
         "--task",
         metavar="TASK",
         type=str,
         action="store",
-        help="task to process (default is rest)",
-        default="rest",
+        help=f"task to process (default is {DEFAULT_TASK})",
+        default=DEFAULT_TASK,
     )
     parser.add_argument(
         "--startpoint",
         metavar="STARTPOINT",
         type=int,
         action="store",
-        help="first TR to use (default is 20)",
-        default=12,
+        help=f"first TR to use (default is {DEFAULT_STARTPOINT})",
+        default=DEFAULT_STARTPOINT,
     )
     parser.add_argument(
         "--ncpus",
         metavar="NCPUS",
         type=int,
         action="store",
-        help="number of cpus per job (default is 8)",
-        default=8,
+        help=f"number of cpus per job (default is {DEFAULT_NCPUS})",
+        default=DEFAULT_NCPUS,
+    )
+    parser.add_argument(
+        "--sourcetype",
+        metavar="TYPE",
+        type=str,
+        choices=["HCP", "cole", "recig", "psusleep"],
+        action="store",
+        help=f"Dataset (default is {DEFAULT_SOURCETYPE})",
+        default=DEFAULT_SOURCETYPE,
     )
     parser.add_argument(
         "--inputlist",
@@ -109,7 +122,7 @@ def _get_parser():
 ##########################################################################################
 
 
-def splitrapidtide_workflow(sourcetype):
+def splitrapidtide_workflow():
     try:
         args = _get_parser().parse_args()
     except SystemExit:
@@ -124,17 +137,17 @@ def splitrapidtide_workflow(sourcetype):
     spatialfiltwidth = 2.0
 
     # file locations
-    outputroot = f"/data/frederic/{sourcetype}/derivatives"
+    outputroot = f"/data/frederic/{args.sourcetype}/derivatives"
     derivativetype = "rapidtide"
-    if sourcetype == "cole":
+    if args.sourcetype == "cole":
         inputroot = "/data/ckorponay/New_HCP_Cleaned_TomMethod"
         theoutputdir = os.path.join(outputroot, "rapidtide")
         thetypes = ["REST1", "REST2"]
-    elif sourcetype == "psusleep":
+    elif args.sourcetype == "psusleep":
         inputroot = "/data/ckorponay/Sleep/fmriprep"
         theoutputdir = os.path.join(outputroot, "rapidtide")
         thetypes = ["rest", "sleep"]
-    elif sourcetype == "recig":
+    elif args.sourcetype == "recig":
         inputroot = "/data/ajanes/REcig/fmri"
         theoutputdir = os.path.join(outputroot, "rapidtide")
         thetypes = ["cue1", "cue2", "cue3", "cue4", "cue5", "resting"]
@@ -166,7 +179,7 @@ def splitrapidtide_workflow(sourcetype):
     SYSTYPE, SUBMITTER, SINGULARITY = micutil.getbatchinfo()
 
     if args.debug:
-        print(f"sourcetype is {sourcetype}")
+        print(f"sourcetype is {args.sourcetype}")
         print(f"\t{inputroot=}")
         print(f"\t{outputroot=}")
         print(f"\t{theoutputdir=}")
@@ -209,8 +222,8 @@ def splitrapidtide_workflow(sourcetype):
     # loop over all run types
     for thetype in thetypes:
         # special options depending on whether using volume or grayordinate files
-        print(f"sourcetype is {sourcetype}")
-        if sourcetype == "cole":
+        print(f"sourcetype is {args.sourcetype}")
+        if args.sourcetype == "cole":
             theboldfiles = micutil.findboldfiles_cole(
                 inputroot,
                 thetype,
@@ -219,13 +232,13 @@ def splitrapidtide_workflow(sourcetype):
                 inputlistfile=args.inputlistfile,
                 debug=args.debug,
             )
-        elif sourcetype == "psusleep":
+        elif args.sourcetype == "psusleep":
             theboldfiles = micutil.findboldfiles_psusleep(
                 thetype,
                 inputlistfile=args.inputlistfile,
                 debug=args.debug,
             )
-        elif sourcetype == "recig":
+        elif args.sourcetype == "recig":
             theboldfiles = micutil.findboldfiles_recig(
                 thetype,
                 inputlistfile=args.inputlistfile,
@@ -246,7 +259,7 @@ def splitrapidtide_workflow(sourcetype):
             sys.exit(1)
 
         for thefile in theboldfiles:
-            if sourcetype == "cole":
+            if args.sourcetype == "cole":
                 absname, thesubj, therun, pedir = micutil.parsecolename(
                     thefile, volumeproc=args.volumeproc
                 )
@@ -255,7 +268,7 @@ def splitrapidtide_workflow(sourcetype):
                     thesubj,
                     thesubj + "_" + thetask + "_" + thesess + outputnamesuffix + extrasuffix,
                 )
-            elif sourcetype == "recig":
+            elif args.sourcetype == "recig":
                 absname, thefmrifilename, thesubj, thesess, thetask = micutil.parserecigname(
                     thefile
                 )
@@ -269,7 +282,7 @@ def splitrapidtide_workflow(sourcetype):
                     print(f"{thesess=}")
                     print(f"{thetask=}")
                 outroot = os.path.join(thesubj, thesubj + "_" + thesess + "_" + thetask)
-            elif sourcetype == "psusleep":
+            elif args.sourcetype == "psusleep":
                 (
                     absname,
                     thefmrifilename,
@@ -316,7 +329,7 @@ def splitrapidtide_workflow(sourcetype):
             fmrifile = absname
             thecommand.append(rapidtidecmd)
             thecommand.append(fmrifile)
-            if args.usefixforglm and (thetype.find("REST") >= 0) and (sourcetype == "HCP"):
+            if args.usefixforglm and (thetype.find("REST") >= 0) and (args.sourcetype == "HCP"):
                 cleanspec = "_hp2000_clean"
                 # glmname = os.path.join(therundir, thefmrifile[:-7] + '_hp2000_clean.nii.gz')
                 glmname = os.path.join(
@@ -331,17 +344,17 @@ def splitrapidtide_workflow(sourcetype):
             thecommand += rapidtideopts
 
             # before submitting the job, check to see if output file exists
-            if sourcetype == "psusleep":
+            if args.sourcetype == "psusleep":
                 if thetype == "sleep":
                     endpoint = 428
                 else:
                     endpoint = 285
-            elif sourcetype == "recig":
+            elif args.sourcetype == "recig":
                 if thetype == "resting":
                     endpoint = 499
                 else:
                     endpoint = 427
-            elif sourcetype == "HCP":
+            elif args.sourcetype == "HCP":
                 endpoint = 1199
             else:
                 endpoint = 100
@@ -383,4 +396,4 @@ def splitrapidtide_workflow(sourcetype):
 
 
 if __name__ == "__main__":
-    splitrapidtide_workflow("recig")
+    splitrapidtide_workflow()

@@ -7,4 +7,4 @@
 import micscriptlib.splitrapidtide as splitrapidtide
 
 if __name__ == "__main__":
-    splitrapidtide.splitrapidtide_workflow("recig")
+    splitrapidtide.splitrapidtide_workflow()
