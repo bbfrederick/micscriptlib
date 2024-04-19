@@ -59,10 +59,10 @@ def _get_parser():
     )
     parser.add_argument(
         "--sourcetype",
-        metavar="TYPE",
+        dest="sourcetype",
+        action="store",
         type=str,
         choices=["HCP", "cole", "recig", "psusleep"],
-        action="store",
         help=f"Dataset (default is {DEFAULT_SOURCETYPE})",
         default=DEFAULT_SOURCETYPE,
     )
