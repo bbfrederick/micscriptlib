@@ -89,7 +89,7 @@ def runcmd(
         print(f"\t{waitfor=}")
     else:
         if cluster:
-            jobname = thecmd[0].split("/")[-1]
+            jobname = "log_" + thecmd[0].split("/")[-1]
             scriptfile, thescript = make_runscript(
                 thecmd, jobname, ncpus=ncpus, timelimit=timelimit, mem=mem
             )
