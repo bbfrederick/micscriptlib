@@ -16,6 +16,8 @@ DEFAULT_TASK = "rest"
 DEFAULT_STARTPOINT = 12
 DEFAULT_NCPUS = 8
 DEFAULT_SOURCETYPE = "HCP"
+DEFAULT_TIMELIMIT = "00:20:00"
+DEFAULT_MEM = "25G"
 
 
 def _get_parser():
@@ -56,6 +58,22 @@ def _get_parser():
         action="store",
         help=f"number of cpus per job (default is {DEFAULT_NCPUS})",
         default=DEFAULT_NCPUS,
+    )
+    parser.add_argument(
+        "--timelimit",
+        metavar="TIME",
+        type=str,
+        action="store",
+        help=f"time limit of job in HH:MM:SS. Default is {DEFAULT_TIMELIMIT})",
+        default=DEFAULT_TIMELIMIT,
+    )
+    parser.add_argument(
+        "--mem",
+        metavar="MEM",
+        type=str,
+        action="store",
+        help=f"Memory limit of job in bytes.  Use the suffix M for megabytes, G for gigabytes. Default is {DEFAULT_MEM})",
+        default=DEFAULT_MEM,
     )
     parser.add_argument(
         "--sourcetype",
@@ -203,7 +221,7 @@ def splitrapidtide_workflow():
         "--similaritymetric hybrid",
         "--noprogressbar",
         "--ampthresh 0.15",
-        "--outputlevel norm",
+        "--outputlevel normal",
     ]
 
     # set options for volume vs surface
@@ -384,7 +402,7 @@ def splitrapidtide_workflow():
 
                 thiscommand = thecommand + [f"--timerange {inputrange}", outputname]
                 scriptfile, thescript = micutil.make_runscript(
-                    thiscommand, timelimit="0:60:00", ncpus=args.ncpus
+                    thiscommand, timelimit=args.timelimit, mem=args.mem, ncpus=args.ncpus
                 )
                 if dothis:
                     if args.doforreal:
