@@ -197,14 +197,13 @@ def splitrapidtide_workflow():
         "--searchrange -7.5 15.0",
         "--lagminthresh 0.25",
         "--lagmaxthresh 2.5",
-        f"--nprocs {args.ncpus - 1}",
+        f"--nprocs {args.ncpus}",
         "--pickleft",
         "--nofitfilt",
         "--similaritymetric hybrid",
-        "--peakfittype gauss",
         "--noprogressbar",
         "--ampthresh 0.15",
-        "--nolimitoutput",
+        "--outputlevel norm",
     ]
 
     # set options for volume vs surface
