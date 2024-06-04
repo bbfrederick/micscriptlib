@@ -379,7 +379,7 @@ def splitrapidtide_workflow():
                 glmname = os.path.join(
                     therundir, thefmrifile[:-7] + "_hp2000_clean.nii.gz"
                 ).replace("preproc", "fixextended")
-                thecommand.append([f"--glmsourcefile {glmname}")
+                thecommand.append(f"--glmsourcefile {glmname}")
 
 
             # before submitting the job, check to see if output file exists
