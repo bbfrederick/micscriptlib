@@ -52,6 +52,15 @@ def _get_parser():
         default=DEFAULT_STARTPOINT,
     )
     parser.add_argument(
+        "--extraargs",
+        metavar="ARGS",
+        type=str,
+        action="store",
+        dest="extraargs",
+        help="string containing extra arguments to use to invoke rapidtide",
+        default=None,
+    )
+    parser.add_argument(
         "--ncpus",
         metavar="NCPUS",
         type=int,
@@ -120,6 +129,13 @@ def _get_parser():
         dest="usefixforglm",
         help="regress lagged timecourses out of original rather than fix cleaned data",
         default=True,
+    )
+    parser.add_argument(
+        "--domotion",
+        action="store_true",
+        dest="domotion",
+        help="do motion regression",
+        default=False,
     )
     parser.add_argument(
         "--debug",
@@ -224,6 +240,10 @@ def splitrapidtide_workflow():
         "--outputlevel normal",
     ]
 
+    # put in the extra rapidtide options
+    if args.extraargs is not None:
+        rapidtideopts.append(args.extraargs)
+
     # set options for volume vs surface
     if args.volumeproc:
         print("setting up for volume processing")
@@ -285,6 +305,7 @@ def splitrapidtide_workflow():
                     thesubj,
                     thesubj + "_" + thetask + "_" + thesess + outputnamesuffix + extrasuffix,
                 )
+                motionfile = None
             elif args.sourcetype == "recig":
                 absname, thefmrifilename, thesubj, thesess, thetask = micutil.parserecigname(
                     thefile
@@ -299,6 +320,7 @@ def splitrapidtide_workflow():
                     print(f"{thesess=}")
                     print(f"{thetask=}")
                 outroot = os.path.join(thesubj, thesubj + "_" + thesess + "_" + thetask)
+                motionfile = thefile.replace("filtered_func_data.nii.gz", "mc/prefiltered_func_data_mcf.par")
             elif args.sourcetype == "psusleep":
                 (
                     absname,
@@ -325,6 +347,7 @@ def splitrapidtide_workflow():
                     thesubj,
                     thesubj + "_" + thetask + "_" + thesess + outputnamesuffix + extrasuffix,
                 )
+                motionfile = None
             else:
                 absname, thesubj, therun, pedir = micutil.parseconnectomename(
                     thefile, volumeproc=args.volumeproc
@@ -333,6 +356,8 @@ def splitrapidtide_workflow():
                     thesubj,
                     thesubj + "_" + thetask + "_" + thesess + outputnamesuffix + extrasuffix,
                 )
+                motiondir, thefmrifile = os.path.split(thefile)
+                motionfile = os.path.join(motiondir, "Movement_Regressors.txt:0-5")
             absname = os.path.abspath(thefile)
             therundir, thefmrifile = os.path.split(absname)
             theresultsdir, therun = os.path.split(therundir)
@@ -346,19 +371,16 @@ def splitrapidtide_workflow():
             fmrifile = absname
             thecommand.append(rapidtidecmd)
             thecommand.append(fmrifile)
+            if args.domotion and motionfile is not None:
+                thecommand.append(["--motionfile", motionfile])
             if args.usefixforglm and (thetype.find("REST") >= 0) and (args.sourcetype == "HCP"):
                 cleanspec = "_hp2000_clean"
                 # glmname = os.path.join(therundir, thefmrifile[:-7] + '_hp2000_clean.nii.gz')
                 glmname = os.path.join(
                     therundir, thefmrifile[:-7] + "_hp2000_clean.nii.gz"
                 ).replace("preproc", "fixextended")
-                thecommand.append("--glmsourcefile=" + glmname)
+                thecommand.append(["--glmsourcefile", glmname])
 
-            # put in the rapidtide options
-            # for theopt in rapidtideopts:
-            # splitopt = theopt.split()
-            # thecommand.extend(splitopt)
-            thecommand += rapidtideopts
 
             # before submitting the job, check to see if output file exists
             if args.sourcetype == "psusleep":
