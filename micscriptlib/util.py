@@ -41,7 +41,7 @@ def getbatchinfo():
     return SYSTYPE, SUBMITTER, SINGULARITY
 
 
-def make_runscript(thecommand, jobname="rapidtide", ncpus=8, timelimit="0:02:00", mem="1G"):
+def make_runscript(thecommand, jobname="rapidtide", ncpus=8, timelimit="0:02:00", mem="1G", debug=False):
     """
     Create a temporary script file we can submit to qsub.
     """
@@ -61,6 +61,8 @@ def make_runscript(thecommand, jobname="rapidtide", ncpus=8, timelimit="0:02:00"
     pre += ["#SBATCH --mail-type=FAIL # notifications for job fail"]
     pre += ["#SBATCH --mail-user=bbfrederick@mclean.harvard.edu"]
 
+    if debug:
+        print(f"thecommand: {thecommand}")
     script = "\n".join(pre) + "\n" + " \\\n    ".join(thecommand) + "\n"
 
     _, filename = tempfile.mkstemp()

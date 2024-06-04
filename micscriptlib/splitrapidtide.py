@@ -372,14 +372,14 @@ def splitrapidtide_workflow():
             thecommand.append(rapidtidecmd)
             thecommand.append(fmrifile)
             if args.domotion and motionfile is not None:
-                thecommand.append(["--motionfile", motionfile])
+                thecommand.append(f"--motionfile {motionfile}")
             if args.usefixforglm and (thetype.find("REST") >= 0) and (args.sourcetype == "HCP"):
                 cleanspec = "_hp2000_clean"
                 # glmname = os.path.join(therundir, thefmrifile[:-7] + '_hp2000_clean.nii.gz')
                 glmname = os.path.join(
                     therundir, thefmrifile[:-7] + "_hp2000_clean.nii.gz"
                 ).replace("preproc", "fixextended")
-                thecommand.append(["--glmsourcefile", glmname])
+                thecommand.append([f"--glmsourcefile {glmname}")
 
 
             # before submitting the job, check to see if output file exists
@@ -424,7 +424,7 @@ def splitrapidtide_workflow():
 
                 thiscommand = thecommand + [f"--timerange {inputrange}", outputname]
                 scriptfile, thescript = micutil.make_runscript(
-                    thiscommand, timelimit=args.timelimit, mem=args.mem, ncpus=args.ncpus
+                    thiscommand, timelimit=args.timelimit, mem=args.mem, ncpus=args.ncpus, debug=args.debug
                 )
                 if dothis:
                     if args.doforreal:
