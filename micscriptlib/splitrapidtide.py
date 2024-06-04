@@ -370,7 +370,7 @@ def splitrapidtide_workflow():
             thecommand = []
             fmrifile = absname
             thecommand.append(rapidtidecmd)
-            thecommand.append(rapidtideopts)
+            thecommand += rapidtideopts
             thecommand.append(fmrifile)
             if args.domotion and motionfile is not None:
                 thecommand.append(f"--motionfile {motionfile}")
