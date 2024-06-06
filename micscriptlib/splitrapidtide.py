@@ -89,7 +89,7 @@ def _get_parser():
         dest="sourcetype",
         action="store",
         type=str,
-        choices=["HCP", "cole", "recig", "psusleep"],
+        choices=["HCP", "cole", "recig", "recig2", "psusleep"],
         help=f"Dataset (default is {DEFAULT_SOURCETYPE})",
         default=DEFAULT_SOURCETYPE,
     )
@@ -138,6 +138,13 @@ def _get_parser():
         default=False,
     )
     parser.add_argument(
+        "--dodesignmat",
+        action="store_true",
+        dest="designmat",
+        help="regress out task design",
+        default=False,
+    )
+    parser.add_argument(
         "--debug",
         action="store_true",
         dest="debug",
@@ -181,7 +188,7 @@ def splitrapidtide_workflow():
         inputroot = "/data/ckorponay/Sleep/fmriprep"
         theoutputdir = os.path.join(outputroot, "rapidtide")
         thetypes = ["rest", "sleep"]
-    elif args.sourcetype == "recig":
+    elif (args.sourcetype == "recig") or (args.sourcetype == "recig2"):
         inputroot = "/data/ajanes/REcig/fmri"
         theoutputdir = os.path.join(outputroot, "rapidtide")
         thetypes = ["cue1", "cue2", "cue3", "cue4", "cue5", "resting"]
@@ -281,6 +288,13 @@ def splitrapidtide_workflow():
                 inputlistfile=args.inputlistfile,
                 debug=args.debug,
             )
+        elif args.sourcetype == "recig2":
+            theboldfiles = micutil.findboldfiles_recig(
+                thetype,
+                inputlistfile=args.inputlistfile,
+                altpath=True,
+                debug=args.debug,
+            )
         else:
             theboldfiles = micutil.findboldfiles_HCP(
                 inputroot,
@@ -306,7 +320,8 @@ def splitrapidtide_workflow():
                     thesubj + "_" + thetask + "_" + thesess + outputnamesuffix + extrasuffix,
                 )
                 motionfile = None
-            elif args.sourcetype == "recig":
+                designfile = None
+            elif (args.sourcetype == "recig") or (args.sourcetype == "recig2"):
                 absname, thefmrifilename, thesubj, thesess, thetask = micutil.parserecigname(
                     thefile
                 )
@@ -321,6 +336,7 @@ def splitrapidtide_workflow():
                     print(f"{thetask=}")
                 outroot = os.path.join(thesubj, thesubj + "_" + thesess + "_" + thetask)
                 motionfile = thefile.replace("filtered_func_data.nii.gz", "mc/prefiltered_func_data_mcf.par")
+                designfile = thefile.replace("filtered_func_data.nii.gz", "design.mat:col_00,col_01,col_02")
             elif args.sourcetype == "psusleep":
                 (
                     absname,
@@ -348,6 +364,7 @@ def splitrapidtide_workflow():
                     thesubj + "_" + thetask + "_" + thesess + outputnamesuffix + extrasuffix,
                 )
                 motionfile = None
+                designfile = None
             else:
                 absname, thesubj, therun, pedir = micutil.parseconnectomename(
                     thefile, volumeproc=args.volumeproc
@@ -358,6 +375,7 @@ def splitrapidtide_workflow():
                 )
                 motiondir, thefmrifile = os.path.split(thefile)
                 motionfile = os.path.join(motiondir, "Movement_Regressors.txt:0-5")
+                designfile = None
             absname = os.path.abspath(thefile)
             therundir, thefmrifile = os.path.split(absname)
             theresultsdir, therun = os.path.split(therundir)
@@ -374,6 +392,8 @@ def splitrapidtide_workflow():
             thecommand.append(fmrifile)
             if args.domotion and motionfile is not None:
                 thecommand.append(f"--motionfile {motionfile}")
+            if args.dodesignmat and (designfile is not None) and (thetype != "resting"):
+                thecommand.append(f"--confoundfile {designfile}")
             if args.usefixforglm and (thetype.find("REST") >= 0) and (args.sourcetype == "HCP"):
                 cleanspec = "_hp2000_clean"
                 # glmname = os.path.join(therundir, thefmrifile[:-7] + '_hp2000_clean.nii.gz')

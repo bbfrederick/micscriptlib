@@ -516,16 +516,21 @@ def findboldfiles_psusleep(
 def findboldfiles_recig(
     thetype,
     inputlistfile=None,
+    altpath=False,
     debug=False,
     bidsroot="/data/ajanes/REcig/fmri",
 ):
+    if altpath:
+        extrapath = "_SpecRegressors"
+    else:
+        extrapath = ""
     if inputlistfile is None:
         searchstring = os.path.join(
             bidsroot,
             "Recig_*",
             "visit*",
             thetype,
-            f"*{thetype}*visit[12].feat",
+            f"*{thetype}*visit[12]{extrapath}.feat",
             "filtered_func_data.nii.gz",
         )
         if debug:
@@ -542,7 +547,7 @@ def findboldfiles_recig(
                 "Recig_" + str(subject),
                 "visit*",
                 thetype,
-                f"*{thetype}*visit[12].feat",
+                f"*{thetype}*visit[12]{extrapath}.feat",
                 "filtered_func_data.nii.gz",
             )
             #    f"*{thetype}*{space}*bold.nii.gz",
