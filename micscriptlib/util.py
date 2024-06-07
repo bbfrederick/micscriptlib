@@ -520,7 +520,7 @@ def findboldfiles_recig(
     debug=False,
     bidsroot="/data/ajanes/REcig/fmri",
 ):
-    if altpath:
+    if (thetype != "resting") and altpath:
         extrapath = "_SpecRegressors"
     else:
         extrapath = ""
