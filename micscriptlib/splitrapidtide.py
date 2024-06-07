@@ -442,7 +442,7 @@ def splitrapidtide_workflow():
                 else:
                     dothis = True
 
-                thiscommand = thecommand + [f"--timerange {inputrange}", outputname]
+                thiscommand = thecommand + [f"--simcalcrange {inputrange}", outputname]
                 scriptfile, thescript = micutil.make_runscript(
                     thiscommand, timelimit=args.timelimit, mem=args.mem, ncpus=args.ncpus, debug=args.debug
                 )
