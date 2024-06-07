@@ -89,7 +89,7 @@ def _get_parser():
         dest="sourcetype",
         action="store",
         type=str,
-        choices=["HCP", "cole", "recig", "recig2", "psusleep"],
+        choices=["HCP", "cole", "recig", "psusleep"],
         help=f"Dataset (default is {DEFAULT_SOURCETYPE})",
         default=DEFAULT_SOURCETYPE,
     )
@@ -188,7 +188,7 @@ def splitrapidtide_workflow():
         inputroot = "/data/ckorponay/Sleep/fmriprep"
         theoutputdir = os.path.join(outputroot, "rapidtide")
         thetypes = ["rest", "sleep"]
-    elif (args.sourcetype == "recig") or (args.sourcetype == "recig2"):
+    elif args.sourcetype == "recig":
         inputroot = "/data/ajanes/REcig/fmri"
         theoutputdir = os.path.join(outputroot, "rapidtide")
         thetypes = ["cue1", "cue2", "cue3", "cue4", "cue5", "resting"]
@@ -286,12 +286,6 @@ def splitrapidtide_workflow():
             theboldfiles = micutil.findboldfiles_recig(
                 thetype,
                 inputlistfile=args.inputlistfile,
-                debug=args.debug,
-            )
-        elif args.sourcetype == "recig2":
-            theboldfiles = micutil.findboldfiles_recig(
-                thetype,
-                inputlistfile=args.inputlistfile,
                 altpath=True,
                 debug=args.debug,
             )
@@ -321,7 +315,7 @@ def splitrapidtide_workflow():
                 )
                 motionfile = None
                 designfile = None
-            elif (args.sourcetype == "recig") or (args.sourcetype == "recig2"):
+            elif args.sourcetype == "recig":
                 absname, thefmrifilename, thesubj, thesess, thetask = micutil.parserecigname(
                     thefile
                 )
