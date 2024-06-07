@@ -140,7 +140,7 @@ def _get_parser():
     parser.add_argument(
         "--dodesignmat",
         action="store_true",
-        dest="designmat",
+        dest="dodesignmat",
         help="regress out task design",
         default=False,
     )
