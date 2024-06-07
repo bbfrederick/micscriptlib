@@ -330,7 +330,8 @@ def splitrapidtide_workflow():
                     print(f"{thetask=}")
                 outroot = os.path.join(thesubj, thesubj + "_" + thesess + "_" + thetask)
                 motionfile = thefile.replace("filtered_func_data.nii.gz", "mc/prefiltered_func_data_mcf.par")
-                designfile = thefile.replace("filtered_func_data.nii.gz", "design.mat:col_00,col_01,col_02")
+                #designfile = thefile.replace("filtered_func_data.nii.gz", "design.mat:col_00,col_01,col_02")
+                designfile = thefile.replace("filtered_func_data.nii.gz", "design.mat")
             elif args.sourcetype == "psusleep":
                 (
                     absname,
