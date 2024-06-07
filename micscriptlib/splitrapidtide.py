@@ -385,7 +385,11 @@ def splitrapidtide_workflow():
             thecommand += rapidtideopts
             thecommand.append(fmrifile)
             if args.domotion and motionfile is not None:
-                thecommand.append(f"--motionfile {motionfile}")
+                if args.sourcetype == "recig":
+                    if thetype == "resting":
+                        thecommand.append(f"--motionfile {motionfile}")
+                else:
+                    thecommand.append(f"--motionfile {motionfile}")
             if args.dodesignmat and (designfile is not None) and (thetype != "resting"):
                 thecommand.append(f"--confoundfile {designfile}")
             if args.usefixforglm and (thetype.find("REST") >= 0) and (args.sourcetype == "HCP"):
