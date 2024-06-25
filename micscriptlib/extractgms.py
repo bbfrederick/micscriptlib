@@ -180,6 +180,7 @@ def extractgms_workflow():
             theboldfiles = micutil.findboldfiles_recig(
                 thetype,
                 inputlistfile=args.inputlistfile,
+                altpath=True,
                 debug=args.debug,
             )
         else:
