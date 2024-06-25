@@ -140,7 +140,7 @@ def extractgms_workflow():
     elif args.sourcetype == "recig":
         inputroot = "/data/ajanes/REcig/fmri"
         theoutputdir = os.path.join(outputroot, "gms")
-        thetypes = ["cue1", "cue2", "cue3", "cue4", "cue5", "resting"]
+        thetypes = ["cue1", "cue2", "cue3", "cue4", "cue5", "cue6", "resting"]
     else:
         inputroot = "/data2/HCP1200"
         theoutputdir = os.path.join(outputroot, "gms")
