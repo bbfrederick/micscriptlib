@@ -20,6 +20,12 @@ if fsldir is not None:
 else:
     fslexists = False
 
+freesurferdir = os.environ.get("FREESURFER_HOME")
+if freesurferdir is not None:
+    freesurferexists = True
+else:
+    freesurferexists = False
+
 antsdir = os.environ.get("ANTSDIR")
 if antsdir is not None:
     antsexists = True
@@ -135,7 +141,7 @@ def runcmd(
 
 def mriconvert(inputfile, outputfile, cluster=False, fake=False, waitfor=None, debug=False):
     convcmd = []
-    convcmd += [f"{antsdir}/mri_convert"]
+    convcmd += [f"{freesurferdir}/mri_convert"]
     convcmd += [inputfile]
     convcmd += [outputfile]
     pidnum = runcmd(
