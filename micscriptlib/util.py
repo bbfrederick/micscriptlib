@@ -141,7 +141,7 @@ def runcmd(
 
 def mriconvert(inputfile, outputfile, cluster=False, fake=False, waitfor=None, debug=False):
     convcmd = []
-    convcmd += [f"{freesurferdir}/mri_convert"]
+    convcmd += [f"{freesurferdir}/bin/mri_convert"]
     convcmd += [inputfile]
     convcmd += [outputfile]
     pidnum = runcmd(
