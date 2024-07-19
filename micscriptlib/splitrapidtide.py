@@ -178,7 +178,7 @@ def splitrapidtide_workflow():
     spatialfiltwidth = 2.0
 
     # set the subject list, if we're using that
-    if inputlistfile is None:
+    if args.inputlistfile is None:
         print("using all subjects")
         inputlist = None
     else:
