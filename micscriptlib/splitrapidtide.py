@@ -183,7 +183,7 @@ def splitrapidtide_workflow():
         inputlist = None
     else:
         print("using subject list")
-        inputlist = readlist(args.inputlistfile)
+        inputlist = micutil.readlist(args.inputlistfile)
 
     # file locations
     outputroot = f"/data/frederic/{args.sourcetype}"
