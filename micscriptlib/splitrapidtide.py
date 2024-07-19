@@ -271,6 +271,11 @@ def splitrapidtide_workflow():
     for thetype in thetypes:
         # special options depending on whether using volume or grayordinate files
         print(f"sourcetype is {args.sourcetype}")
+        if debug:
+            print("about to find files")
+            print(f"\t{inputroot=}")
+            print(f"\t{thetype=}")
+            print(f"\t{args.inputlistfile=}")
         if args.sourcetype == "cole":
             theboldfiles = micutil.findboldfiles_cole(
                 inputroot,
