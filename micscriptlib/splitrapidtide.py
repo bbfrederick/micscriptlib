@@ -244,7 +244,8 @@ def splitrapidtide_workflow():
         print(f"\t{SINGULARITY=}")
 
     # make the appropriate output directory
-    theoutputdir = f"{theoutputdir}_{args.numsections}"
+    if args.numsections > 1:
+        theoutputdir = f"{theoutputdir}_{args.numsections}"
 
     rapidtideopts = [
         "--despecklepasses 4",
