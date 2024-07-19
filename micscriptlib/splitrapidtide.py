@@ -184,6 +184,10 @@ def splitrapidtide_workflow():
         inputroot = "/data/ckorponay/New_HCP_Cleaned_TomMethod"
         theoutputdir = os.path.join(outputroot, "rapidtide")
         thetypes = ["REST1", "REST2"]
+    elif args.sourcetype == "ds001927":
+        inputroot = f"{outputroot}/fmriprep"
+        theoutputdir = os.path.join(outputroot, "rapidtide")
+        thetypes = ["restpre", "restpost"]
     elif args.sourcetype == "psusleep":
         inputroot = "/data/ckorponay/Sleep/fmriprep"
         theoutputdir = os.path.join(outputroot, "rapidtide")
@@ -282,6 +286,12 @@ def splitrapidtide_workflow():
                 inputlistfile=args.inputlistfile,
                 debug=args.debug,
             )
+        elif args.sourcetype == "ds001927":
+            theboldfiles = micutil.findboldfiles_fmriprep(
+                thetype,
+                inputlistfile=args.inputlistfile,
+                debug=args.debug,
+            )
         elif args.sourcetype == "recig":
             theboldfiles = micutil.findboldfiles_recig(
                 thetype,
@@ -332,7 +342,7 @@ def splitrapidtide_workflow():
                 motionfile = thefile.replace("filtered_func_data.nii.gz", "mc/prefiltered_func_data_mcf.par")
                 #designfile = thefile.replace("filtered_func_data.nii.gz", "design.mat:col_00,col_01,col_02")
                 designfile = thefile.replace("filtered_func_data.nii.gz", "design.mat")
-            elif args.sourcetype == "psusleep":
+            elif args.sourcetype == "psusleep" or args.sourcetype == "ds001927":
                 (
                     absname,
                     thefmrifilename,
@@ -413,6 +423,8 @@ def splitrapidtide_workflow():
                     endpoint = 499
                 else:
                     endpoint = 427
+            elif args.sourcetype == "ds001927":
+                endpoint = 599
             elif args.sourcetype == "HCP":
                 endpoint = 1199
             else:

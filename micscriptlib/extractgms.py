@@ -176,6 +176,12 @@ def extractgms_workflow():
                 inputlistfile=args.inputlistfile,
                 debug=args.debug,
             )
+        elif args.sourcetype == "ds001927":
+            theboldfiles = micutil.findboldfiles_ds001927(
+                thetype,
+                inputlistfile=args.inputlistfile,
+                debug=args.debug,
+            )
         elif args.sourcetype == "recig":
             theboldfiles = micutil.findboldfiles_recig(
                 thetype,
