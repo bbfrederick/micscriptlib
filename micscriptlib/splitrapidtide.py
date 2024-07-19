@@ -271,7 +271,7 @@ def splitrapidtide_workflow():
     for thetype in thetypes:
         # special options depending on whether using volume or grayordinate files
         print(f"sourcetype is {args.sourcetype}")
-        if debug:
+        if args.debug:
             print("about to find files")
             print(f"\t{inputroot=}")
             print(f"\t{thetype=}")
