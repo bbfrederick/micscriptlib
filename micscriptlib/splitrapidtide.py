@@ -372,7 +372,9 @@ def splitrapidtide_workflow():
                     thespace,
                 ) = micutil.parsebidsname(thefile)
                 thesubj = f"sub-{thesubj}"
-                thetask = f"sub-{thetask}"
+                thetask = f"task-{thetask}"
+                if thesess is not None:
+                    thesess = f"ses-{thesess}"
                 if args.debug:
                     print(f"{absname=}")
                     print(f"{thefmrifilename=}")
