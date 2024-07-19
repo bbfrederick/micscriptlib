@@ -600,7 +600,7 @@ def findboldfiles_fmriprep(
     # now filter
     if subjects is None:
         thesubjs = completelist
-    else
+    else:
         thesubjs = [s for s in completelist if any(f"sub-{xs}" in s for xs in subjects)]
     if debug:
         print(thesubjs)
