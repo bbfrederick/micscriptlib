@@ -177,6 +177,14 @@ def splitrapidtide_workflow():
     extrasuffix = ""
     spatialfiltwidth = 2.0
 
+    # set the subject list, if we're using that
+    if inputlistfile is None:
+        print("using all subjects")
+        inputlist = None
+    else:
+        print("using subject list")
+        inputlist = readlist(args.inputlistfile)
+
     # file locations
     outputroot = f"/data/frederic/{args.sourcetype}"
     derivativetype = "rapidtide"
@@ -186,6 +194,7 @@ def splitrapidtide_workflow():
         thetypes = ["REST1", "REST2"]
     elif args.sourcetype == "ds001927":
         thebidsroot = "/data/frederic/ds001927"
+        hassessions = True
         inputroot = f"{outputroot}/fmriprep"
         theoutputdir = os.path.join(outputroot, "derivatives", "rapidtide")
         thetypes = ["restpre", "restpost"]
@@ -294,8 +303,10 @@ def splitrapidtide_workflow():
             )
         elif args.sourcetype == "ds001927":
             theboldfiles = micutil.findboldfiles_fmriprep(
-                task=thetype,
-                inputlistfile=args.inputlistfile,
+                subjects=inputlist,
+                sessions=None,
+                tasks=[thetype],
+                hassessions=True,
                 bidsroot=thebidsroot,
                 debug=args.debug,
             )

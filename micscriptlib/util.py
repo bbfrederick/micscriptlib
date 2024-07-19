@@ -481,7 +481,7 @@ def parsebidsname(thefile):
     return absname, thefilename, thesubj, theses, therun, pedir, thetask, thespace
 
 
-def findboldfiles_psusleep(
+def files_psusleep(
     thetype,
     inputlistfile=None,
     debug=False,
@@ -564,13 +564,92 @@ def findboldfiles_recig(
 
 
 def findboldfiles_fmriprep(
-    task="rest",
-    inputlistfile=None,
-    debug=False,
+    subjects=None,
+    sessions=None,
+    tasks=None,
     space="MNI152NLin6Asym",
     bidsroot="/data/frederic/OASIS",
+    hassessions=True,
+    debug=False,
 ):
-    if inputlistfile is None:
+    # find all bold files
+    if hassessions:
+        pathparts = [
+            bidsroot,
+            "derivatives",
+            "fmriprep",
+            "sub*",
+            "ses*",
+            "func",
+            "*bold.nii.gz",
+        ]
+    else:
+        pathparts = [
+            bidsroot,
+            "derivatives",
+            "fmriprep",
+            "sub*",
+            "func",
+            "*bold.nii.gz",
+        ]
+    searchstring = os.path.join(pathparts)
+    completelist = glob.glob(searchstring)
+    if debug:
+        print(completelist)
+
+    # now filter
+    if subjects is None:
+        thesubjs = completelist
+    else
+        thesubjs = [s for s in completelist if any(f"sub-{xs}" in s for xs in subjects)]
+    if debug:
+        print(thesubjs)
+
+    if hassessions:
+        if sessions is None:
+            thesessions = thesubs
+        else:
+            thesessions = [s for s in thesubjs if any(f"ses-{xs}" in s for xs in sessions)]
+    if debug:
+        print(thesessions)
+
+    if tasks is None:
+        thetasks = thesessions
+    else:
+        thetasks = [s for s in thesessions if any(f"task-{xs}" in s for xs in tasks)]
+    if debug:
+        print(thetasks)
+
+    thespace = f"space-{space}"
+    return [s for s in thetasks if thespace in s]
+
+
+
+
+    """if subject is None:
+        pathparts.append("sub-*")
+    else:
+        # loop over subjects
+        for subject in subjects:
+            pathparts.append(subject)
+            if hassessions:
+                # loop over sessions
+                if sessions is None:
+                    pathparts.append("ses-*")
+                else:
+                    for session in sessions:
+                        pathparts.append(f"ses-*")
+
+        if session is None:
+            searchstring = os.path.join(
+                bidsroot,
+                "derivatives",
+                "fmriprep",
+                "sub*",
+                "ses*",
+                "func",
+                f"*task-{task}_*{space}*bold.nii.gz",
+            )
         searchstring = os.path.join(
             bidsroot,
             "derivatives",
@@ -580,6 +659,7 @@ def findboldfiles_fmriprep(
             "func",
             f"*task-{task}_*{space}*bold.nii.gz",
         )
+
         if debug:
             print("searchstring:", searchstring)
         return glob.glob(searchstring)
@@ -601,7 +681,7 @@ def findboldfiles_fmriprep(
             if debug:
                 print("searchstring:", searchstring)
             retlist.append(glob.glob(searchstring))
-        return [val for sublist in retlist for val in sublist]
+        return [val for sublist in retlist for val in sublist]"""
 
 
 def findaparcaseg_fmriprep(
