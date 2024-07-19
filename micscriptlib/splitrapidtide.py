@@ -89,7 +89,7 @@ def _get_parser():
         dest="sourcetype",
         action="store",
         type=str,
-        choices=["HCP", "cole", "recig", "psusleep"],
+        choices=["HCP", "cole", "recig", "psusleep", "ds001927"],
         help=f"Dataset (default is {DEFAULT_SOURCETYPE})",
         default=DEFAULT_SOURCETYPE,
     )
