@@ -607,11 +607,11 @@ def findboldfiles_fmriprep(
 
     if hassessions:
         if sessions is None:
-            thesessions = thesubs
+            thesessions = thesubjs
         else:
             thesessions = [s for s in thesubjs if any(f"ses-{xs}" in s for xs in sessions)]
     if debug:
-        print(thesessions)
+        print(thesessions)j
 
     if tasks is None:
         thetasks = thesessions
