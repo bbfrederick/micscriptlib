@@ -14,6 +14,7 @@ micscriptlib requires some external libraries to be installed first:
 -  pyqt5
 -  pyqtgraph
 -  pillow
+-  pybids
 
 
 Installing from pypi (NEW!)

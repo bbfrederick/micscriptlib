@@ -596,7 +596,7 @@ def findboldfiles_fmriprep(
                 "sub-" + str(subject),
                 "ses*",
                 "func",
-                f"*{space}*bold.nii.gz",
+                f"*task-{task}_*{space}*bold.nii.gz",
             )
             if debug:
                 print("searchstring:", searchstring)
