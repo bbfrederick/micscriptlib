@@ -20,8 +20,14 @@ if fsldir is not None:
 else:
     fslexists = False
 
-antsdir = os.environ.get("ANTSDIR")
-if antsdir is not None:
+freesurferpath = os.path.join(os.environ.get("FREESURFER_HOME"), "bin")
+if freesurferpath is not None:
+    freesurferexists = True
+else:
+    freesurferexists = False
+
+antspath = os.environ.get("ANTSPATH")
+if antspath is not None:
     antsexists = True
 else:
     antsexists = False
@@ -135,7 +141,7 @@ def runcmd(
 
 def mriconvert(inputfile, outputfile, cluster=False, fake=False, waitfor=None, debug=False):
     convcmd = []
-    convcmd += [f"{antsdir}/mri_convert"]
+    convcmd += [f"{freesurferpath}/mri_convert"]
     convcmd += [inputfile]
     convcmd += [outputfile]
     pidnum = runcmd(
@@ -154,7 +160,7 @@ def mriconvert(inputfile, outputfile, cluster=False, fake=False, waitfor=None, d
 def n4correct(inputfile, outputdir, cluster=False, fake=False, waitfor=None, debug=False):
     thename, theext = tide_io.niftisplitext(inputfile)
     n4cmd = []
-    n4cmd += [f"{antsdir}/N4BiasFieldCorrection"]
+    n4cmd += [f"{antspath}/N4BiasFieldCorrection"]
     n4cmd += ["-d", "3"]
     n4cmd += ["-i", inputfile]
     n4cmd += ["-o", pjoin(outputdir, thename + "_n4" + theext)]
@@ -183,7 +189,7 @@ def antsapply(
     interp=None,
 ):
     applyxfmcmd = []
-    applyxfmcmd += [f"{antsdir}/antsApplyTransforms"]
+    applyxfmcmd += [f"{antspath}/antsApplyTransforms"]
     applyxfmcmd += ["--default-value", "0"]
     applyxfmcmd += ["-d", "3"]
     applyxfmcmd += ["-i", inputname]
