@@ -564,6 +564,7 @@ def findboldfiles_recig(
 
 
 def findboldfiles_fmriprep(
+    task="rest",
     inputlistfile=None,
     debug=False,
     space="MNI152NLin6Asym",
@@ -577,7 +578,7 @@ def findboldfiles_fmriprep(
             "sub*",
             "ses*",
             "func",
-            f"*{space}*bold.nii.gz",
+            f"*task-{task}_*{space}*bold.nii.gz",
         )
         if debug:
             print("searchstring:", searchstring)

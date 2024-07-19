@@ -178,27 +178,28 @@ def splitrapidtide_workflow():
     spatialfiltwidth = 2.0
 
     # file locations
-    outputroot = f"/data/frederic/{args.sourcetype}/derivatives"
+    outputroot = f"/data/frederic/{args.sourcetype}"
     derivativetype = "rapidtide"
     if args.sourcetype == "cole":
         inputroot = "/data/ckorponay/New_HCP_Cleaned_TomMethod"
-        theoutputdir = os.path.join(outputroot, "rapidtide")
+        theoutputdir = os.path.join(outputroot, "derivatives", "rapidtide")
         thetypes = ["REST1", "REST2"]
     elif args.sourcetype == "ds001927":
+        thebidsroot = "/data/frederic/ds001927"
         inputroot = f"{outputroot}/fmriprep"
-        theoutputdir = os.path.join(outputroot, "rapidtide")
+        theoutputdir = os.path.join(outputroot, "derivatives", "rapidtide")
         thetypes = ["restpre", "restpost"]
     elif args.sourcetype == "psusleep":
         inputroot = "/data/ckorponay/Sleep/fmriprep"
-        theoutputdir = os.path.join(outputroot, "rapidtide")
+        theoutputdir = os.path.join(outputroot, "derivatives", "rapidtide")
         thetypes = ["rest", "sleep"]
     elif args.sourcetype == "recig":
         inputroot = "/data/ajanes/REcig/fmri"
-        theoutputdir = os.path.join(outputroot, "rapidtide")
+        theoutputdir = os.path.join(outputroot, "derivatives", "rapidtide")
         thetypes = ["cue1", "cue2", "cue3", "cue4", "cue5", "cue6", "resting"]
     else:
         inputroot = "/data2/HCP1200"
-        theoutputdir = os.path.join(outputroot, "rapidtide")
+        theoutputdir = os.path.join(outputroot, "derivatives", "rapidtide")
         rest1runs = ["rfMRI_REST1"]
         rest2runs = ["rfMRI_REST2"]
         emotionruns = ["tfMRI_EMOTION"]
@@ -293,8 +294,9 @@ def splitrapidtide_workflow():
             )
         elif args.sourcetype == "ds001927":
             theboldfiles = micutil.findboldfiles_fmriprep(
-                thetype,
+                task=thetype,
                 inputlistfile=args.inputlistfile,
+                bidsroot=thebidsroot,
                 debug=args.debug,
             )
         elif args.sourcetype == "recig":
