@@ -592,7 +592,7 @@ def findboldfiles_fmriprep(
             "func",
             "*bold.nii.gz",
         ]
-    searchstring = os.path.join(pathparts)
+    searchstring = os.path.join(*pathparts)
     completelist = glob.glob(searchstring)
     if debug:
         print(completelist)
