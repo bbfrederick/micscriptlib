@@ -386,7 +386,7 @@ def splitrapidtide_workflow():
                     print(f"{thespace=}")
                 outroot = os.path.join(
                     thesubj,
-                    thesubj + "_" + thetask + "_" + thesess + outputnamesuffix + extrasuffix,
+                    thesubj + "_" + thesess "_" +  thetask + "_" + outputnamesuffix + extrasuffix,
                 )
                 motionfile = None
                 designfile = None
