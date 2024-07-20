@@ -413,9 +413,12 @@ def splitrapidtide_workflow():
                 grayfile = None
             absname = os.path.abspath(thefile)
             therundir, thefmrifile = os.path.split(absname)
-            theresultsdir, therun = os.path.split(therundir)
-            if not micutil.makeadir(os.path.join(theoutputdir, thesubj)):
-                print("cannot initialize output subject directory, exiting")
+            if thesess is not None:
+                theresultsdir = os.path.join(theoutputdir, thesubj, thesess)
+            else:
+                theresultsdir = os.path.join(theoutputdir, thesubj)
+            if not micutil.makeadir(theresultsdir):
+                print("cannot initialize specific output directory, exiting")
                 sys.exit(1)
 
             print("thefmrifile is", thefmrifile)
