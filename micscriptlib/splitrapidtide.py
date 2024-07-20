@@ -417,6 +417,11 @@ def splitrapidtide_workflow():
                 print("cannot initialize output subject directory, exiting")
                 sys.exit(1)
 
+            if brainmask is not None:
+                thecommand.append(f"--corrmask {brainmask}")
+            if grayfile is not None:
+                thecommand.append(f"--globalmeaninclude {grayfile}")
+
             print("thefmrifile is", thefmrifile)
 
             thecommand = []
