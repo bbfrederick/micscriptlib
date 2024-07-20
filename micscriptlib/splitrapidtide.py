@@ -344,6 +344,8 @@ def splitrapidtide_workflow():
                 )
                 motionfile = None
                 designfile = None
+                brainmask = None
+                grayfile = None
             elif args.sourcetype == "recig":
                 absname, thefmrifilename, thesubj, thesess, thetask = micutil.parserecigname(
                     thefile
@@ -361,6 +363,8 @@ def splitrapidtide_workflow():
                 motionfile = thefile.replace("filtered_func_data.nii.gz", "mc/prefiltered_func_data_mcf.par")
                 #designfile = thefile.replace("filtered_func_data.nii.gz", "design.mat:col_00,col_01,col_02")
                 designfile = thefile.replace("filtered_func_data.nii.gz", "design.mat")
+                brainmask = None
+                grayfile = None
             elif args.sourcetype == "psusleep" or args.sourcetype == "ds001927":
                 (
                     absname,
@@ -391,6 +395,8 @@ def splitrapidtide_workflow():
                 )
                 motionfile = None
                 designfile = None
+                brainmask = thefile.replace("desc-preproc_bold", "desc-brain_mask")
+                grayfile = os.path.join(thebidsroot, "derivatives", "fmriprep", thesubj, "anat", f"{thesubj}_space-MNI152NLin6Asym_res-2_dseg.nii.gz:1")
             else:
                 absname, thesubj, therun, pedir = micutil.parseconnectomename(
                     thefile, volumeproc=args.volumeproc
@@ -402,6 +408,8 @@ def splitrapidtide_workflow():
                 motiondir, thefmrifile = os.path.split(thefile)
                 motionfile = os.path.join(motiondir, "Movement_Regressors.txt:0-5")
                 designfile = None
+                brainmask = None
+                grayfile = None
             absname = os.path.abspath(thefile)
             therundir, thefmrifile = os.path.split(absname)
             theresultsdir, therun = os.path.split(therundir)
@@ -439,17 +447,23 @@ def splitrapidtide_workflow():
                     endpoint = 428
                 else:
                     endpoint = 285
+                thetr = 2.0
             elif args.sourcetype == "recig":
                 if thetype == "resting":
                     endpoint = 499
                 else:
                     endpoint = 427
+                thetr = 0.8
             elif args.sourcetype == "ds001927":
                 endpoint = 599
+                thetr = 1.25
             elif args.sourcetype == "HCP":
                 endpoint = 1199
+                thetr = 0.72
             else:
                 endpoint = 100
+                thetr = 3.0
+            simcalcstart = int(round(100 * (0.72 / thetr), 0)
             numpoints = endpoint - args.startpoint + 1
             pointspersection = numpoints // args.numsections
             print(
@@ -475,7 +489,10 @@ def splitrapidtide_workflow():
                 else:
                     dothis = True
 
-                thiscommand = thecommand + [f"--simcalcrange {inputrange}", outputname]
+                if args.numsections == 1:
+                    thiscommand = thecommand + [f"--simcalcrange {simcalcstart} -1", outputname]
+                else:
+                    thiscommand = thecommand + [f"--simcalcrange {inputrange}", outputname]
                 scriptfile, thescript = micutil.make_runscript(
                     thiscommand, timelimit=args.timelimit, mem=args.mem, ncpus=args.ncpus, debug=args.debug
                 )
