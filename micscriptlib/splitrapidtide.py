@@ -389,10 +389,11 @@ def splitrapidtide_workflow():
                     print(f"{pedir=}")
                     print(f"{thetask=}")
                     print(f"{thespace=}")
-                outroot = os.path.join(
-                    thesubj,
-                    thesubj + "_" + thesess + "_" +  thetask,
-                )
+                if thesess is not None:
+                    pathparts = [thesubj, thesess, thesubj + "_" + thesess + "_" +  thetask]
+                else:
+                    pathparts = [thesubj, thesubj + "_" +  thetask]
+                outroot = os.path.join(*pathparts)
                 motionfile = None
                 designfile = None
                 brainmask = thefile.replace("desc-preproc_bold", "desc-brain_mask")
