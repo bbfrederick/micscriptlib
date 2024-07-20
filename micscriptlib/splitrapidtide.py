@@ -463,7 +463,7 @@ def splitrapidtide_workflow():
             else:
                 endpoint = 100
                 thetr = 3.0
-            simcalcstart = int(round(100 * (0.72 / thetr), 0)
+            simcalcstart = int(round(100 * (0.72 / thetr), 0))
             numpoints = endpoint - args.startpoint + 1
             pointspersection = numpoints // args.numsections
             print(
