@@ -417,11 +417,6 @@ def splitrapidtide_workflow():
                 print("cannot initialize output subject directory, exiting")
                 sys.exit(1)
 
-            if brainmask is not None:
-                thecommand.append(f"--corrmask {brainmask}")
-            if grayfile is not None:
-                thecommand.append(f"--globalmeaninclude {grayfile}")
-
             print("thefmrifile is", thefmrifile)
 
             thecommand = []
@@ -444,6 +439,11 @@ def splitrapidtide_workflow():
                     therundir, thefmrifile[:-7] + "_hp2000_clean.nii.gz"
                 ).replace("preproc", "fixextended")
                 thecommand.append(f"--glmsourcefile {glmname}")
+            if brainmask is not None:
+                thecommand.append(f"--corrmask {brainmask}")
+            if grayfile is not None:
+                thecommand.append(f"--globalmeaninclude {grayfile}")
+
 
 
             # before submitting the job, check to see if output file exists
