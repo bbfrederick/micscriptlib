@@ -447,7 +447,8 @@ def splitrapidtide_workflow():
                 thecommand.append(f"--corrmask {brainmask}")
             if grayfile is not None:
                 thecommand.append(f"--globalmeaninclude {grayfile}")
-
+                thecommand.append(f"--refineinclude {grayfile}")
+                thecommand.append(f"--offsetinclude {grayfile}")
 
 
             # before submitting the job, check to see if output file exists
