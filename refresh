@@ -4,5 +4,5 @@ git pull
 cleandirs
 mkdir -p build/lib/micscriptlib
 touch build/lib/micscriptlib/_version.py
-pip install .
-rm -rf build dist rapidtide.egg-info
+pip install -e .
+rm -rf micscriptlib.egg-info
