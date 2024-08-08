@@ -362,6 +362,9 @@ def parseconnectomename(thefile, volumeproc=True, debug=False):
     absname = os.path.abspath(thefile)
     therundir, thefmrifile = os.path.split(absname)
     theresultsdir, therun = os.path.split(therundir)
+    splitname = thefmrifile.split("_")
+    therun = "_".join(splitname[0:1])
+    pedir = splitname[2]
     if debug:
         print(f"{absname=}")
         print(f"{therundir=}")
@@ -371,12 +374,9 @@ def parseconnectomename(thefile, volumeproc=True, debug=False):
         theMNINonLinDir, dummy = os.path.split(theresultsdir)
         thesubjdir, dummy = os.path.split(theMNINonLinDir)
         dummy, thesubj = os.path.split(thesubjdir)
-        pedir = therun[-2:]
     else:
-        splitname = thefmrifile.split("_")
-        thesubj = therun
-        therun = "_".join(splitname[0:2])
-        pedir = splitname[2]
+        print("NOT IMPLEMENTED!")
+        thesubj = None
     if debug:
         print(f"{thesubj=}")
         print(f"{therun=}")
