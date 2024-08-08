@@ -293,7 +293,7 @@ def splitrapidtide_workflow():
     else:
         print("setting up for grayordinate processing")
         rapidtideopts.append("-c")
-        outputnamesuffix = "_grayordinate"
+        outputnamesuffix = "grayordinate"
         qspec = ""
 
     # loop over all run types
