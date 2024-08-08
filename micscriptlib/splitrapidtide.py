@@ -428,7 +428,7 @@ def splitrapidtide_workflow():
                     nameparts.append(args.extrasuffix)
                 outroot = os.path.join(
                     thesubj,
-                    "_".join(nameparts) + "_"
+                    "_".join(nameparts)
                 )
                 motiondir, thefmrifile = os.path.split(thefile)
                 motionfile = os.path.join(motiondir, "Movement_Regressors.txt:0-5")
