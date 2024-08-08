@@ -288,7 +288,7 @@ def splitrapidtide_workflow():
     if args.volumeproc:
         print("setting up for volume processing")
         rapidtideopts.append(f"--spatialfilt {spatialfiltwidth}")
-        outputnamesuffix = ""
+        outputnamesuffix = None
         qspec = ""
     else:
         print("setting up for grayordinate processing")
