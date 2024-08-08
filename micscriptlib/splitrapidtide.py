@@ -167,7 +167,7 @@ def splitrapidtide_workflow():
     try:
         args = _get_parser().parse_args()
     except SystemExit:
-        _get_parser().print_help()
+        print("Use --help option for detailed information on options.")
         raise
 
     if args.debug:
