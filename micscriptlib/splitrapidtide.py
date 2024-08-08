@@ -15,7 +15,7 @@ DEFAULT_NUMSECTIONS = 1
 DEFAULT_TASK = "rest"
 DEFAULT_STARTPOINT = 12
 DEFAULT_NCPUS = 8
-DEFAULT_SOURCETYPE = "HCP"
+DEFAULT_SOURCETYPE = "HCPYA"
 DEFAULT_TIMELIMIT = "00:20:00"
 DEFAULT_MEM = "25G"
 
@@ -24,7 +24,7 @@ def _get_parser():
     # get the command line parameters
     parser = argparse.ArgumentParser(
         prog="splitrapidtide",
-        description="runs rapidtide on the connectome data",
+        description="runs rapidtide on various known datasets",
         usage="%(prog)s",
     )
     parser.add_argument(
@@ -89,7 +89,7 @@ def _get_parser():
         dest="sourcetype",
         action="store",
         type=str,
-        choices=["HCP", "cole", "recig", "psusleep", "ds001927"],
+        choices=["HCPYA", "cole", "recig", "psusleep", "ds001927"],
         help=f"Dataset (default is {DEFAULT_SOURCETYPE})",
         default=DEFAULT_SOURCETYPE,
     )
@@ -206,7 +206,16 @@ def splitrapidtide_workflow():
         inputroot = "/data/ajanes/REcig/fmri"
         theoutputdir = os.path.join(outputroot, "derivatives", "rapidtide")
         thetypes = ["cue1", "cue2", "cue3", "cue4", "cue5", "cue6", "resting"]
+    elif args.sourcetype == "HCPA":
+        print("using HCPA")
+        print("NOT IMPLEMENTED - exiting")
+        raise
+    elif args.sourcetype == "ABCD":
+        print("using ABCD")
+        print("NOT IMPLEMENTED - exiting")
+        raise
     else:
+        # HCPYA
         inputroot = "/data2/HCP1200"
         theoutputdir = os.path.join(outputroot, "derivatives", "rapidtide")
         rest1runs = ["rfMRI_REST1"]
@@ -321,7 +330,7 @@ def splitrapidtide_workflow():
                 debug=args.debug,
             )
         else:
-            theboldfiles = micutil.findboldfiles_HCP(
+            theboldfiles = micutil.findboldfiles_HCPYA(
                 inputroot,
                 thetype,
                 args.volumeproc,
@@ -439,7 +448,7 @@ def splitrapidtide_workflow():
                     thecommand.append(f"--motionfile {motionfile}")
             if args.dodesignmat and (designfile is not None) and (thetype != "resting"):
                 thecommand.append(f"--confoundfile {designfile}")
-            if args.usefixforglm and (thetype.find("REST") >= 0) and (args.sourcetype == "HCP"):
+            if args.usefixforglm and (thetype.find("REST") >= 0) and (args.sourcetype == "HCPYA"):
                 cleanspec = "_hp2000_clean"
                 # glmname = os.path.join(therundir, thefmrifile[:-7] + '_hp2000_clean.nii.gz')
                 glmname = os.path.join(
@@ -471,7 +480,7 @@ def splitrapidtide_workflow():
             elif args.sourcetype == "ds001927":
                 endpoint = 599
                 thetr = 1.25
-            elif args.sourcetype == "HCP":
+            elif args.sourcetype == "HCPYA":
                 endpoint = 1199
                 thetr = 0.72
             else:

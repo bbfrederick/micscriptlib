@@ -13,7 +13,7 @@ import micscriptlib.util as micutil
 
 DEFAULT_NUMSECTIONS = 1
 DEFAULT_TASK = "rest"
-DEFAULT_SOURCETYPE = "HCP"
+DEFAULT_SOURCETYPE = "HCPYA"
 DEFAULT_TIMELIMIT = "00:5:00"
 DEFAULT_MEM = "4G"
 
@@ -56,7 +56,7 @@ def _get_parser():
         dest="sourcetype",
         action="store",
         type=str,
-        choices=["HCP", "cole", "recig", "psusleep"],
+        choices=["HCPYA", "cole", "recig", "psusleep"],
         help=f"Dataset (default is {DEFAULT_SOURCETYPE})",
         default=DEFAULT_SOURCETYPE,
     )
@@ -190,7 +190,7 @@ def extractgms_workflow():
                 debug=args.debug,
             )
         else:
-            theboldfiles = micutil.findboldfiles_HCP(
+            theboldfiles = micutil.findboldfiles_HCPYA(
                 inputroot,
                 thetype,
                 True,
@@ -209,7 +209,7 @@ def extractgms_workflow():
                     thefile, volumeproc=True
                 )
                 maskname = os.path.join(therundir, "brainmask_fs.2.nii.gz")
-            elif args.sourcetype == "HCP":
+            elif args.sourcetype == "HCPYA":
                 absname, thesubj, therun, pedir, MNIDir = micutil.parseconnectomename(
                     thefile, volumeproc=True, debug=args.debug
                 )

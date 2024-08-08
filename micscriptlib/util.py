@@ -395,7 +395,7 @@ def parsecolename(thefile, volumeproc=True):
     return absname, thesubj, therun, pedir
 
 
-def findboldfiles_HCP(theroot, thetype, volumeproc, usefixforglm, inputlistfile=None, debug=False):
+def findboldfiles_HCPYA(theroot, thetype, volumeproc, usefixforglm, inputlistfile=None, debug=False):
     # special options depending on whether using volume or grayordinate files
     if inputlistfile is None:
         if volumeproc:
