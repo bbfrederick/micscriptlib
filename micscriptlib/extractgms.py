@@ -211,7 +211,7 @@ def extractgms_workflow():
                 maskname = os.path.join(therundir, "brainmask_fs.2.nii.gz")
             elif args.sourcetype == "HCP":
                 absname, thesubj, therun, pedir = micutil.parseconnectomename(
-                    thefile, volumeproc=True
+                    thefile, volumeproc=True, debug=args.debug
                 )
                 outroot = os.path.join(thesubj, thesubj + "_" + thetype + "_" + pedir)
                 maskname = os.path.join(therundir, "brainmask_fs.2.nii.gz")
