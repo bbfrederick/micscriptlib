@@ -411,6 +411,7 @@ def splitrapidtide_workflow():
                 designfile = None
                 brainmask = None
                 grayfile = None
+                thesess = None
             absname = os.path.abspath(thefile)
             therundir, thefmrifile = os.path.split(absname)
             if thesess is not None:
