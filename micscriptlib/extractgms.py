@@ -205,12 +205,12 @@ def extractgms_workflow():
 
         for thefile in theboldfiles:
             if args.sourcetype == "cole":
-                absname, thesubj, therun, pedir = micutil.parseconnectomename(
+                absname, thesubj, therun, pedir= micutil.parsecolename(
                     thefile, volumeproc=True
                 )
                 maskname = os.path.join(therundir, "brainmask_fs.2.nii.gz")
             elif args.sourcetype == "HCP":
-                absname, thesubj, therun, pedir = micutil.parseconnectomename(
+                absname, thesubj, therun, pedir, MNIDir = micutil.parseconnectomename(
                     thefile, volumeproc=True, debug=args.debug
                 )
                 outroot = os.path.join(thesubj, thesubj + "_" + thetype + "_" + pedir)

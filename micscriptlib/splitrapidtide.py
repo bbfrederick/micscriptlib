@@ -399,7 +399,7 @@ def splitrapidtide_workflow():
                 brainmask = thefile.replace("desc-preproc_bold", "desc-brain_mask")
                 grayfile = os.path.join(thebidsroot, "derivatives", "fmriprep", thesubj, "anat", f"{thesubj}_space-MNI152NLin6Asym_res-2_dseg.nii.gz:1")
             else:
-                absname, thesubj, therun, pedir = micutil.parseconnectomename(
+                absname, thesubj, therun, pedir, MNIDir = micutil.parseconnectomename(
                     thefile, volumeproc=args.volumeproc, debug=args.debug
                 )
                 outroot = os.path.join(
@@ -410,7 +410,7 @@ def splitrapidtide_workflow():
                 motionfile = os.path.join(motiondir, "Movement_Regressors.txt:0-5")
                 designfile = None
                 brainmask = None
-                grayfile = None
+                grayfile = os.path.join(MNIDir, "wmparc.nii.gz:WMPARC_GRAY")
                 thesess = None
             absname = os.path.abspath(thefile)
             therundir, thefmrifile = os.path.split(absname)

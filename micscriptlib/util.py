@@ -365,15 +365,14 @@ def parseconnectomename(thefile, volumeproc=True, debug=False):
     splitname = thefmrifile.split("_")
     therun = "_".join(splitname[0:1])
     pedir = splitname[2]
+    theMNINonLinDir, dummy = os.path.split(theresultsdir)
     if debug:
         print(f"{absname=}")
         print(f"{therundir=}")
         print(f"{thefmrifile=}")
         print(f"{theresultsdir=}")
+        print(f"{theMNINonLinDir=}")
     if volumeproc:
-        theMNINonLinDir, dummy = os.path.split(theresultsdir)
-        if debug:
-            print(f"{theMNINonLinDir=}")
         thesubjdir, dummy = os.path.split(theMNINonLinDir)
         dummy, thesubj = os.path.split(thesubjdir)
     else:
@@ -383,7 +382,7 @@ def parseconnectomename(thefile, volumeproc=True, debug=False):
         print(f"{thesubj=}")
         print(f"{therun=}")
         print(f"{pedir=}")
-    return absname, thesubj, therun, pedir
+    return absname, thesubj, therun, pedir, theMNINonLinDir
 
 
 def parsecolename(thefile, volumeproc=True):
