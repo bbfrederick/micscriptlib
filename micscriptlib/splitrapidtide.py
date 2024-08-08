@@ -219,7 +219,7 @@ def splitrapidtide_workflow():
         socialruns = ["tfMRI_SOCIAL"]
         wmruns = ["tfMRI_WM"]
 
-        thetypes = (
+        '''thetypes = (
             emotionruns
             + gamblingruns
             + languageruns
@@ -229,7 +229,9 @@ def splitrapidtide_workflow():
             + wmruns
             + rest1runs
             + rest2runs
-        )
+        )'''
+
+        thetypes = rest1runs + rest2runs
     rapidtidecmd = "/cm/shared/anaconda3/envs/mic/bin/rapidtide"
     SYSTYPE, SUBMITTER, SINGULARITY = micutil.getbatchinfo()
 
