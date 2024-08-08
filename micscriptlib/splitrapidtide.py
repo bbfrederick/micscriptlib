@@ -110,6 +110,14 @@ def _get_parser():
         default=True,
     )
     parser.add_argument(
+        "--extrasuffix",
+        metavar="SUFFIX",
+        type=str,
+        action="store",
+        help="Extre suffix to add to the end of the output file root (default is an empty string)",
+        default=None,
+    )
+    parser.add_argument(
         "--fake",
         action="store_false",
         dest="doforreal",
@@ -174,7 +182,6 @@ def splitrapidtide_workflow():
         print(args)
 
     # define some globals
-    extrasuffix = ""
     spatialfiltwidth = 2.0
 
     # set the subject list, if we're using that
@@ -351,7 +358,7 @@ def splitrapidtide_workflow():
                 print(f"{absname=}, {thesubj=}, {therun=}, {pedir=}")
                 outroot = os.path.join(
                     thesubj,
-                    thesubj + "_" + thetask + "_" + thesess + outputnamesuffix + extrasuffix,
+                    thesubj + "_" + thetask + "_" + thesess + outputnamesuffix + args.extrasuffix,
                 )
                 motionfile = None
                 designfile = None
@@ -410,12 +417,18 @@ def splitrapidtide_workflow():
                 brainmask = thefile.replace("desc-preproc_bold", "desc-brain_mask")
                 grayfile = os.path.join(thebidsroot, "derivatives", "fmriprep", thesubj, "anat", f"{thesubj}_space-MNI152NLin6Asym_res-2_dseg.nii.gz:1")
             else:
+                # HCPYA
                 absname, thesubj, therun, pedir, MNIDir = micutil.parseconnectomename(
                     thefile, volumeproc=args.volumeproc, debug=args.debug
                 )
+                nameparts = [thesubj, therun, pedir]
+                if outputnamesuffix is not None:
+                    nameparts.append(outputnamesuffix)
+                if args.extrasuffix is not None:
+                    nameparts.append(args.extrasuffix)
                 outroot = os.path.join(
                     thesubj,
-                    thesubj + "_" + therun + "_" + pedir + "_" + outputnamesuffix + extrasuffix,
+                    "_".join(nameparts) + "_"
                 )
                 motiondir, thefmrifile = os.path.split(thefile)
                 motionfile = os.path.join(motiondir, "Movement_Regressors.txt:0-5")
