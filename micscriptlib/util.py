@@ -358,10 +358,15 @@ def makeadir(pathname):
     return True
 
 
-def parseconnectomename(thefile, volumeproc=True):
+def parseconnectomename(thefile, volumeproc=True, debug=False):
     absname = os.path.abspath(thefile)
     therundir, thefmrifile = os.path.split(absname)
     theresultsdir, therun = os.path.split(therundir)
+    if debug:
+        print(f"{absname=}")
+        print(f"{therundir=}")
+        print(f"{thefmrifile=}")
+        print(f"{theresultsdir=}")
     if volumeproc:
         theMNINonLinDir, dummy = os.path.split(theresultsdir)
         thesubjdir, dummy = os.path.split(theMNINonLinDir)
@@ -372,6 +377,10 @@ def parseconnectomename(thefile, volumeproc=True):
         thesubj = therun
         therun = "_".join(splitname[0:2])
         pedir = splitname[2]
+    if debug:
+        print(f"{thesubj=}")
+        print(f"{therun=}")
+        print(f"{pedir=}")
     return absname, thesubj, therun, pedir
 
 

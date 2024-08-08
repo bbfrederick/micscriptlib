@@ -400,7 +400,7 @@ def splitrapidtide_workflow():
                 grayfile = os.path.join(thebidsroot, "derivatives", "fmriprep", thesubj, "anat", f"{thesubj}_space-MNI152NLin6Asym_res-2_dseg.nii.gz:1")
             else:
                 absname, thesubj, therun, pedir = micutil.parseconnectomename(
-                    thefile, volumeproc=args.volumeproc
+                    thefile, volumeproc=args.volumeproc, debug=args.debug
                 )
                 outroot = os.path.join(
                     thesubj,
