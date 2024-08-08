@@ -372,6 +372,8 @@ def parseconnectomename(thefile, volumeproc=True, debug=False):
         print(f"{theresultsdir=}")
     if volumeproc:
         theMNINonLinDir, dummy = os.path.split(theresultsdir)
+        if debug:
+            print(f"{theMNINonLinDir=}")
         thesubjdir, dummy = os.path.split(theMNINonLinDir)
         dummy, thesubj = os.path.split(thesubjdir)
     else:
