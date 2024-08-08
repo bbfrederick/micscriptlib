@@ -363,7 +363,7 @@ def parseconnectomename(thefile, volumeproc=True, debug=False):
     therundir, thefmrifile = os.path.split(absname)
     theresultsdir, therun = os.path.split(therundir)
     splitname = thefmrifile.split("_")
-    therun = "_".join(splitname[0:1])
+    therun = "_".join(splitname[0:2])
     pedir = splitname[2]
     theMNINonLinDir, dummy = os.path.split(theresultsdir)
     if debug:
