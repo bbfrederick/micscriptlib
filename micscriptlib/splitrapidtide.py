@@ -248,7 +248,7 @@ def splitrapidtide_workflow():
         )'''
 
         thetypes = rest1runs + rest2runs
-    rapidtidecmd = "/cm/shared/anaconda3/envs/mic/bin/rapidtide"
+    rapidtidecmd = "/cm/shared/miniforge3/envs/mic/bin/rapidtide"
     SYSTYPE, SUBMITTER, SINGULARITY = micutil.getbatchinfo()
 
     if args.debug:

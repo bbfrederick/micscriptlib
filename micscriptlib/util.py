@@ -9,7 +9,7 @@ from os.path import join as pjoin
 
 import rapidtide.io as tide_io
 
-pythonbindir = "/cm/shared/anaconda3/envs/mic/bin"
+pythonbindir = "/cm/shared/miniforge3/envs/mic/bin"
 
 fsldir = os.environ.get("FSLDIR")
 if fsldir is not None:
