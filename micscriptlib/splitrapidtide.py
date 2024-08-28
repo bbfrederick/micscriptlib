@@ -213,9 +213,9 @@ def splitrapidtide_workflow():
         inputroot = "/data/ajanes/REcig/fmri"
         theoutputdir = os.path.join(outputroot, "derivatives", "rapidtide")
         if args.task == "rest":
-            thetypes = ["cue1", "cue2", "cue3", "cue4", "cue5", "cue6", "resting"]
-        else:
             thetypes = ["resting"]
+        else:
+            thetypes = ["cue1", "cue2", "cue3", "cue4", "cue5", "cue6", "resting"]
     elif args.sourcetype == "HCPA":
         print("using HCPA")
         print("NOT IMPLEMENTED - exiting")
