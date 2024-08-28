@@ -471,13 +471,13 @@ def splitrapidtide_workflow():
                     therundir, thefmrifile[:-7] + "_hp2000_clean.nii.gz"
                 ).replace("preproc", "fixextended")
                 thecommand.append(f"--glmsourcefile {glmname}")
+            if args.usefixforglm and (thetype.find("rest") >= 0) and (args.sourcetype == "recig"):
+                glmname = fmrifile.replace("data.nii.gz", "data_clean.nii.gz")
+                thecommand.append(f"--glmsourcefile {glmname}")
             if brainmask is not None:
                 thecommand.append(f"--corrmask {brainmask}")
             if grayfile is not None:
                 thecommand.append(f"--graymattermask {grayfile}")
-                #thecommand.append(f"--globalmeaninclude {grayfile}")
-                #thecommand.append(f"--refineinclude {grayfile}")
-                #thecommand.append(f"--offsetinclude {grayfile}")
 
 
             # before submitting the job, check to see if output file exists
