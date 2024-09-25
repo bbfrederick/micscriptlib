@@ -15,6 +15,7 @@ DEFAULT_NUMSECTIONS = 1
 DEFAULT_TASK = "rest"
 DEFAULT_STARTPOINT = 12
 DEFAULT_NCPUS = 8
+DEFAULT_SPATIALFILTWIDTH = 2.0
 DEFAULT_SOURCETYPE = "HCPYA"
 DEFAULT_TIMELIMIT = "00:20:00"
 DEFAULT_MEM = "25G"
@@ -59,6 +60,14 @@ def _get_parser():
         dest="extraargs",
         help="string containing extra arguments to use to invoke rapidtide",
         default=None,
+    )
+    parser.add_argument(
+        "--spatialfiltwidth",
+        metavar="WIDTH",
+        type=float,
+        action="store",
+        help=f"kernel size of spatial filter in mm (default is {DEFAULT_SPATIALFILTWIDTH})",
+        default=DEFAULT_SPATIALFILTWIDTH,
     )
     parser.add_argument(
         "--ncpus",
@@ -181,9 +190,6 @@ def splitrapidtide_workflow():
     if args.debug:
         print(args)
 
-    # define some globals
-    spatialfiltwidth = 2.0
-
     # set the subject list, if we're using that
     if args.inputlistfile is None:
         print("using all subjects")
@@ -290,7 +296,7 @@ def splitrapidtide_workflow():
     # set options for volume vs surface
     if args.volumeproc:
         print("setting up for volume processing")
-        rapidtideopts.append(f"--spatialfilt {spatialfiltwidth}")
+        rapidtideopts.append(f"--spatialfilt {args.spatialfiltwidth}")
         outputnamesuffix = None
         qspec = ""
     else:
