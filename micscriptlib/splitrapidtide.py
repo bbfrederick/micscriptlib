@@ -438,6 +438,7 @@ def splitrapidtide_workflow():
                 designfile = None
                 brainmask = os.path.join(motiondir, "brainmask_fs.2.nii.gz")
                 grayfile = os.path.join(MNIDir, "wmparc.nii.gz:APARC_GRAY")
+                whitefile = os.path.join(MNIDir, "wmparc.nii.gz:APARC_WHITE")
                 thesess = None
             absname = os.path.abspath(thefile)
             therundir, thefmrifile = os.path.split(absname)
@@ -475,9 +476,11 @@ def splitrapidtide_workflow():
                 glmname = fmrifile.replace("data.nii.gz", "data_clean.nii.gz")
                 thecommand.append(f"--glmsourcefile {glmname}")
             if brainmask is not None:
-                thecommand.append(f"--corrmask {brainmask}")
+                thecommand.append(f"--brainmask {brainmask}")
             if grayfile is not None:
                 thecommand.append(f"--graymattermask {grayfile}")
+            if whitefile is not None:
+                thecommand.append(f"--whitemattermask {grayfile}")
 
 
             # before submitting the job, check to see if output file exists
