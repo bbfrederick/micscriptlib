@@ -437,8 +437,9 @@ def splitrapidtide_workflow():
                 motionfile = os.path.join(motiondir, "Movement_Regressors.txt:0-5")
                 designfile = None
                 brainmask = os.path.join(motiondir, "brainmask_fs.2.nii.gz")
-                grayfile = os.path.join(MNIDir, "wmparc.nii.gz:APARC_GRAY")
-                whitefile = os.path.join(MNIDir, "wmparc.nii.gz:APARC_WHITE")
+                SegDir = "/data/frederic/connectome/reanalysis/derivatives/segmentations"
+                grayfile = os.path.join(SegDir, f"{thesubj}_resampled_wmparc.nii.gz:APARC_GRAY")
+                whitefile = os.path.join(SegDir, f"{thesubj}_resampled_wmparc.nii.gz:APARC_WHITE")
                 thesess = None
             absname = os.path.abspath(thefile)
             therundir, thefmrifile = os.path.split(absname)
