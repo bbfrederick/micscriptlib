@@ -436,7 +436,7 @@ def splitrapidtide_workflow():
                 motiondir, thefmrifile = os.path.split(thefile)
                 motionfile = os.path.join(motiondir, "Movement_Regressors.txt:0-5")
                 designfile = None
-                brainmask = None
+                brainmask = os.path.join(motiondir, "brainmask_fs.2.nii.gz")
                 grayfile = os.path.join(MNIDir, "wmparc.nii.gz:APARC_GRAY")
                 thesess = None
             absname = os.path.abspath(thefile)
