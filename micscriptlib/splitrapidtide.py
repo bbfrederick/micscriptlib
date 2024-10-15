@@ -276,12 +276,9 @@ def splitrapidtide_workflow():
 
     rapidtideopts = [
         "--despecklepasses 4",
-        "--filterfreqs 0.009 0.15",
+        "--filterband lfo_tight",
         "--searchrange -7.5 15.0",
-        "--lagminthresh 0.25",
-        "--lagmaxthresh 2.5",
         f"--nprocs {args.ncpus}",
-        "--pickleft",
         "--nofitfilt",
         "--similaritymetric hybrid",
         "--noprogressbar",
@@ -487,7 +484,7 @@ def splitrapidtide_workflow():
             if grayfile is not None:
                 thecommand.append(f"--graymattermask {grayfile}")
             if whitefile is not None:
-                thecommand.append(f"--whitemattermask {grayfile}")
+                thecommand.append(f"--whitemattermask {whitefile}")
 
 
             # before submitting the job, check to see if output file exists
