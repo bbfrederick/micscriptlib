@@ -119,6 +119,14 @@ def _get_parser():
         default=True,
     )
     parser.add_argument(
+        "--outputdir",
+        metavar="DIR",
+        type=str,
+        action="store",
+        help="Override the default output directory and put output here.",
+        default=None,
+    )
+    parser.add_argument(
         "--extrasuffix",
         metavar="SUFFIX",
         type=str,
@@ -259,6 +267,10 @@ def splitrapidtide_workflow():
         thetypes = rest1runs + rest2runs
     rapidtidecmd = "/cm/shared/miniforge3/envs/mic/bin/rapidtide"
     SYSTYPE, SUBMITTER, SINGULARITY = micutil.getbatchinfo()
+
+    # check to see if we should override the output directory
+    if args.outputdir is not None:
+        theoutputdir = args.outputdir
 
     if args.debug:
         print(f"sourcetype is {args.sourcetype}")
