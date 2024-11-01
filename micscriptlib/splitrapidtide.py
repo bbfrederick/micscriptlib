@@ -277,7 +277,7 @@ def splitrapidtide_workflow():
     rapidtideopts = [
         "--despecklepasses 4",
         "--filterband lfo",
-        "--searchrange -10.0 15.0",
+        "--searchrange -7.5 15.0",
         f"--nprocs {args.ncpus}",
         "--nofitfilt",
         "--similaritymetric hybrid",
