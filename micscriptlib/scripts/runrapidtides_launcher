@@ -4,7 +4,7 @@
 #       $Date: 2015/03/06 14:12:29 $
 #       $Id: preprocess_spo2.py,v 1.1 2015/03/06 14:12:29 frederic Exp $
 #
-import micscriptlib.splitrapidtide as splitrapidtide
+import micscriptlib.runrapidtides as runrapidtides
 
 if __name__ == "__main__":
-    splitrapidtide.splitrapidtide_workflow()
+    runrapidtides.runrapidtides_workflow()

@@ -29,11 +29,11 @@ with open(path.join(here, "VERSION"), "w", encoding="utf-8") as f:
 modules_list = [
     "micscriptlib/util",
     "micscriptlib/workflows/extractgms",
-    "micscriptlib/workflows/splitrapidtide",
+    "micscriptlib/workflows/runrapidtides",
 ]
 
 script_list = [
-    "micscriptlib/scripts/splitrapidtide_launcher",
+    "micscriptlib/scripts/runrapidtides_launcher",
     "micscriptlib/scripts/extractgms_launcher",
 ]
 

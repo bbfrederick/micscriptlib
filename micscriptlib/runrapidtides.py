@@ -24,7 +24,7 @@ DEFAULT_MEM = "25G"
 def _get_parser():
     # get the command line parameters
     parser = argparse.ArgumentParser(
-        prog="splitrapidtide",
+        prog="runrapidtides",
         description="runs rapidtide on various known datasets",
         usage="%(prog)s",
     )
@@ -188,7 +188,7 @@ def _get_parser():
 ##########################################################################################
 
 
-def splitrapidtide_workflow():
+def runrapidtides_workflow():
     try:
         args = _get_parser().parse_args()
     except SystemExit:
@@ -566,4 +566,4 @@ def splitrapidtide_workflow():
 
 
 if __name__ == "__main__":
-    splitrapidtide_workflow()
+    runrapidtides_workflow()
