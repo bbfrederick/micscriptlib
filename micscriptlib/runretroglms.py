@@ -420,13 +420,15 @@ def runretroglms_workflow():
             # check to see if we should override the output directory
             if args.alternateoutputdir is not None:
                 theresultsdir = os.path.join(args.alternateoutputdir, thesubj)
+                theoutputroot = os.path.join(theresultsdir, therootname)
                 if args.debug:
                     print(f"alternate output is {theresultsdir=}")
-                thecommand.append(f"--alternateoutput {os.path.join(theresultsdir, therootname)}")
+                thecommand.append(f"--alternateoutput {theoutputroot}")
                 if not micutil.makeadir(theresultsdir):
                     print("cannot initialize output root directory, exiting")
                     sys.exit(1)
-
+            else:
+                theoutputroot = datafileroot
 
             # before submitting the job, check to see if output file exists
             if args.sourcetype == "psusleep":
@@ -454,19 +456,13 @@ def runretroglms_workflow():
             numpoints = endpoint - args.startpoint + 1
             pointspersection = numpoints
             for section in range(1):
-                sectionname = f"{section + 1}-of-{1}"
-                secstart = args.startpoint + section * pointspersection
-                secend = secstart + pointspersection - 1
-                inputrange = f"{secstart} {secend}"
-                outputname = f"{os.path.join(theoutputdir, outroot)}"
-
                 dothis = False
                 if args.existcheck:
-                    if os.path.isfile(outputname + "_DONE.txt"):
-                        print(outputname + "_DONE.txt", "exists - skipping")
+                    if os.path.isfile(theoutputroot + "_RETRODONE.txt"):
+                        print(theoutputroot + "_RETRODONE.txt", "exists - skipping")
                         dothis = False
                     else:
-                        print(outputname + "_DONE.txt", "does not exist - running")
+                        print(theoutputroot + "_RETRODONE.txt", "does not exist - running")
                         dothis = True
                 else:
                     dothis = True
