@@ -29,20 +29,28 @@ def _get_parser():
         usage="%(prog)s",
     )
     parser.add_argument(
-        "--numsections",
-        metavar="NUMSECTIONS",
-        type=int,
-        action="store",
-        help=f"number of sections to split timecourse into (default is {DEFAULT_NUMSECTIONS})",
-        default=DEFAULT_NUMSECTIONS,
-    )
-    parser.add_argument(
-        "--task",
-        metavar="TASK",
+        "--inputdir",
+        metavar="inputdir",
         type=str,
         action="store",
-        help=f"task to process (default is {DEFAULT_TASK})",
+        help=f"Location of the existing rapidtide runs",
         default=DEFAULT_TASK,
+    )
+    parser.add_argument(
+        "--outputlevel",
+        dest="outputlevel",
+        action="store",
+        type=str,
+        choices=["min", "less", "normal", "more", "max"],
+        help=(
+            "The level of file output produced.  'min' produces only absolutely essential files, 'less' adds in "
+            "the GLM filtered data (rather than just filter efficacy metrics), 'normal' saves what you "
+            "would typically want around for interactive data exploration, "
+            "'more' adds files that are sometimes useful, and 'max' outputs anything you might possibly want. "
+            "Selecting 'max' will produce ~3x your input datafile size as output.  "
+            f'Default is "normal".'
+        ),
+        default="normal",
     )
     parser.add_argument(
         "--startpoint",
@@ -60,14 +68,6 @@ def _get_parser():
         dest="extraargs",
         help="string containing extra arguments to use to invoke retroglm",
         default=None,
-    )
-    parser.add_argument(
-        "--spatialfiltwidth",
-        metavar="WIDTH",
-        type=float,
-        action="store",
-        help=f"kernel size of spatial filter in mm (default is {DEFAULT_SPATIALFILTWIDTH})",
-        default=DEFAULT_SPATIALFILTWIDTH,
     )
     parser.add_argument(
         "--ncpus",
@@ -119,7 +119,7 @@ def _get_parser():
         default=True,
     )
     parser.add_argument(
-        "--outputdir",
+        "--alternateoutputdir",
         metavar="DIR",
         type=str,
         action="store",
@@ -154,20 +154,6 @@ def _get_parser():
         dest="usefixforglm",
         help="regress lagged timecourses out of original rather than fix cleaned data",
         default=True,
-    )
-    parser.add_argument(
-        "--domotion",
-        action="store_true",
-        dest="domotion",
-        help="do motion regression",
-        default=False,
-    )
-    parser.add_argument(
-        "--dodesignmat",
-        action="store_true",
-        dest="dodesignmat",
-        help="regress out task design",
-        default=False,
     )
     parser.add_argument(
         "--debug",
@@ -208,7 +194,7 @@ def runretroglms_workflow():
 
     # file locations
     outputroot = f"/data/frederic/{args.sourcetype}"
-    derivativetype = "rapidtide"
+    derivativetype = "retroglm"
     if args.sourcetype == "cole":
         inputroot = "/data/ckorponay/New_HCP_Cleaned_TomMethod"
         theoutputdir = os.path.join(outputroot, "derivatives", "rapidtide")
@@ -225,7 +211,7 @@ def runretroglms_workflow():
         thetypes = ["rest", "sleep"]
     elif args.sourcetype == "recig":
         inputroot = "/data/ajanes/REcig/fmri"
-        theoutputdir = os.path.join(outputroot, "derivatives", "rapidtide")
+        theoutputdir = os.path.join(outputroot, "derivatives", "retroglm")
         if args.task == "rest":
             thetypes = ["resting"]
         else:
@@ -241,7 +227,8 @@ def runretroglms_workflow():
     else:
         # HCPYA
         inputroot = "/data2/HCP1200"
-        theoutputdir = os.path.join(outputroot, "derivatives", "rapidtide")
+        procroot = args.inputdir
+        theoutputdir = os.path.join(outputroot, "derivatives", "retroglm")
         rest1runs = ["rfMRI_REST1"]
         rest2runs = ["rfMRI_REST2"]
         emotionruns = ["tfMRI_EMOTION"]
@@ -265,12 +252,10 @@ def runretroglms_workflow():
         )'''
 
         thetypes = rest1runs + rest2runs
-    rapidtidecmd = "/cm/shared/miniforge3/envs/mic/bin/rapidtide"
+    retroglmcmd = "/cm/shared/miniforge3/envs/mic/bin/retroglm"
+    retroglmcmd = "retroglm"
     SYSTYPE, SUBMITTER, SINGULARITY = micutil.getbatchinfo()
 
-    # check to see if we should override the output directory
-    if args.outputdir is not None:
-        theoutputdir = args.outputdir
 
     if args.debug:
         print(f"sourcetype is {args.sourcetype}")
@@ -283,36 +268,28 @@ def runretroglms_workflow():
         print(f"\t{SINGULARITY=}")
 
     # make the appropriate output directory
-    if args.numsections > 1:
-        theoutputdir = f"{theoutputdir}_{args.numsections}"
-
-    rapidtideopts = [
-        "--despecklepasses 4",
-        "--filterband lfo",
-        "--searchrange -7.5 15.0",
+    retroglmopts = [
         f"--nprocs {args.ncpus}",
-        "--nofitfilt",
-        "--similaritymetric hybrid",
         "--noprogressbar",
-        "--ampthresh 0.15",
-        "--outputlevel normal",
     ]
 
-    # put in the extra rapidtide options
+
+    # put in the extra retroglm options
     if args.extraargs is not None:
-        rapidtideopts.append(args.extraargs)
+        retroglmopts.append(args.extraargs)
 
     # set options for volume vs surface
     if args.volumeproc:
         print("setting up for volume processing")
-        rapidtideopts.append(f"--spatialfilt {args.spatialfiltwidth}")
         outputnamesuffix = None
         qspec = ""
     else:
         print("setting up for grayordinate processing")
-        rapidtideopts.append("-c")
+        retroglmopts.append("-c")
         outputnamesuffix = "grayordinate"
         qspec = ""
+
+    retroglmopts.append(f"--outputlevel {args.outputlevel}")
 
     # loop over all run types
     for thetype in thetypes:
@@ -321,6 +298,7 @@ def runretroglms_workflow():
         if args.debug:
             print("about to find files")
             print(f"\t{inputroot=}")
+            print(f"\t{procroot=}")
             print(f"\t{thetype=}")
             print(f"\t{args.inputlistfile=}")
         if args.sourcetype == "cole":
@@ -355,36 +333,26 @@ def runretroglms_workflow():
                 debug=args.debug,
             )
         else:
-            theboldfiles = micutil.findboldfiles_HCPYA(
-                inputroot,
+            therapidtideruns = micutil.findrapidtideruns_HCPYA(
+                procroot,
                 thetype,
-                args.volumeproc,
-                args.usefixforglm,
                 inputlistfile=args.inputlistfile,
                 debug=args.debug,
             )
 
-        if not micutil.makeadir(theoutputdir):
-            print("cannot initialize output root directory, exiting")
-            sys.exit(1)
-
-        for thefile in theboldfiles:
+        for datafileroot in therapidtideruns:
             if args.sourcetype == "cole":
                 absname, thesubj, therun, pedir = micutil.parsecolename(
-                    thefile, volumeproc=args.volumeproc
+                    datafileroot, volumeproc=args.volumeproc
                 )
                 print(f"{absname=}, {thesubj=}, {therun=}, {pedir=}")
                 outroot = os.path.join(
                     thesubj,
                     thesubj + "_" + thetask + "_" + thesess + outputnamesuffix + args.extrasuffix,
                 )
-                motionfile = None
-                designfile = None
-                brainmask = None
-                grayfile = None
             elif args.sourcetype == "recig":
                 absname, thefmrifilename, thesubj, thesess, thetask = micutil.parserecigname(
-                    thefile
+                    datafileroot
                 )
                 thesubj = f"sub-{thesubj}"
                 thetask = f"task-{thetask}"
@@ -396,11 +364,6 @@ def runretroglms_workflow():
                     print(f"{thesess=}")
                     print(f"{thetask=}")
                 outroot = os.path.join(thesubj, thesubj + "_" + thesess + "_" + thetask)
-                motionfile = thefile.replace("filtered_func_data.nii.gz", "mc/prefiltered_func_data_mcf.par")
-                #designfile = thefile.replace("filtered_func_data.nii.gz", "design.mat:col_00,col_01,col_02")
-                designfile = thefile.replace("filtered_func_data.nii.gz", "design.mat")
-                brainmask = None
-                grayfile = None
             elif args.sourcetype == "psusleep" or args.sourcetype == "ds001927":
                 (
                     absname,
@@ -411,7 +374,7 @@ def runretroglms_workflow():
                     pedir,
                     thetask,
                     thespace,
-                ) = micutil.parsebidsname(thefile)
+                ) = micutil.parsebidsname(datafileroot)
                 thesubj = f"sub-{thesubj}"
                 thetask = f"task-{thetask}"
                 if thesess is not None:
@@ -430,16 +393,11 @@ def runretroglms_workflow():
                 else:
                     pathparts = [thesubj, thesubj + "_" +  thetask]
                 outroot = os.path.join(*pathparts)
-                motionfile = None
-                designfile = None
-                brainmask = thefile.replace("desc-preproc_bold", "desc-brain_mask")
-                grayfile = os.path.join(thebidsroot, "derivatives", "fmriprep", thesubj, "anat", f"{thesubj}_space-MNI152NLin6Asym_res-2_dseg.nii.gz:1")
             else:
                 # HCPYA
-                absname, thesubj, therun, pedir, MNIDir = micutil.parseconnectomename(
-                    thefile, volumeproc=args.volumeproc, debug=args.debug
-                )
+                therootname, thesubj, therun, pedir = micutil.parseconnectomerapidtidename(datafileroot, debug=args.debug)
                 nameparts = [thesubj, therun, pedir]
+                print(f"{therootname=}, {thesubj=}, {therun=}, {pedir=}")
                 if outputnamesuffix is not None:
                     nameparts.append(outputnamesuffix)
                 if args.extrasuffix is not None:
@@ -448,55 +406,26 @@ def runretroglms_workflow():
                     thesubj,
                     "_".join(nameparts)
                 )
-                motiondir, thefmrifile = os.path.split(thefile)
-                motionfile = os.path.join(motiondir, "Movement_Regressors.txt:0-5")
-                designfile = None
-                brainmask = os.path.join(motiondir, "brainmask_fs.2.nii.gz")
-                SegDir = "/data/frederic/connectome/reanalysis/derivatives/segmentations"
-                grayfile = os.path.join(SegDir, f"{thesubj}_resampled_wmparc.nii.gz:APARC_GRAY")
-                whitefile = os.path.join(SegDir, f"{thesubj}_resampled_wmparc.nii.gz:APARC_WHITE")
                 thesess = None
-            absname = os.path.abspath(thefile)
-            therundir, thefmrifile = os.path.split(absname)
-            if thesess is not None:
-                theresultsdir = os.path.join(theoutputdir, thesubj, thesess)
-            else:
-                theresultsdir = os.path.join(theoutputdir, thesubj)
-            if not micutil.makeadir(theresultsdir):
-                print("cannot initialize specific output directory, exiting")
-                sys.exit(1)
 
-            print("thefmrifile is", thefmrifile)
+            fmrifile = micutil.findHCPYAsourcefile(inputroot, thesubj, therun, pedir, usefixforglm=args.usefixforglm, debug=args.debug)
+            print(f"{fmrifile=}")
 
             thecommand = []
-            fmrifile = absname
-            thecommand.append(rapidtidecmd)
-            thecommand += rapidtideopts
+            thecommand.append(retroglmcmd)
+            thecommand.append(datafileroot)
             thecommand.append(fmrifile)
-            if args.domotion and motionfile is not None:
-                if args.sourcetype == "recig":
-                    if thetype == "resting":
-                        thecommand.append(f"--motionfile {motionfile}")
-                else:
-                    thecommand.append(f"--motionfile {motionfile}")
-            if args.dodesignmat and (designfile is not None) and (thetype != "resting"):
-                thecommand.append(f"--confoundfile {designfile}")
-            if args.usefixforglm and (thetype.find("REST") >= 0) and (args.sourcetype == "HCPYA"):
-                cleanspec = "_hp2000_clean"
-                # glmname = os.path.join(therundir, thefmrifile[:-7] + '_hp2000_clean.nii.gz')
-                glmname = os.path.join(
-                    therundir, thefmrifile[:-7] + "_hp2000_clean.nii.gz"
-                ).replace("preproc", "fixextended")
-                thecommand.append(f"--glmsourcefile {glmname}")
-            if args.usefixforglm and (thetype.find("rest") >= 0) and (args.sourcetype == "recig"):
-                glmname = fmrifile.replace("data.nii.gz", "data_clean.nii.gz")
-                thecommand.append(f"--glmsourcefile {glmname}")
-            if brainmask is not None:
-                thecommand.append(f"--brainmask {brainmask}")
-            if grayfile is not None:
-                thecommand.append(f"--graymattermask {grayfile}")
-            if whitefile is not None:
-                thecommand.append(f"--whitemattermask {whitefile}")
+            thecommand += retroglmopts
+
+            # check to see if we should override the output directory
+            if args.alternateoutputdir is not None:
+                theresultsdir = os.path.join(args.alternateoutputdir, thesubj)
+                if args.debug:
+                    print(f"alternate output is {theresultsdir=}")
+                thecommand.append(f"--alternateoutput {os.path.join(theresultsdir, therootname)}")
+                if not micutil.makeadir(theresultsdir):
+                    print("cannot initialize output root directory, exiting")
+                    sys.exit(1)
 
 
             # before submitting the job, check to see if output file exists
@@ -523,19 +452,14 @@ def runretroglms_workflow():
                 thetr = 3.0
             simcalcstart = int(round(100 * (0.72 / thetr), 0))
             numpoints = endpoint - args.startpoint + 1
-            pointspersection = numpoints // args.numsections
-            print(
-                f"dividing timecourse into {args.numsections} sections of {pointspersection} points"
-            )
-            for section in range(args.numsections):
-                sectionname = f"{section + 1}-of-{args.numsections}"
+            pointspersection = numpoints
+            for section in range(1):
+                sectionname = f"{section + 1}-of-{1}"
                 secstart = args.startpoint + section * pointspersection
                 secend = secstart + pointspersection - 1
                 inputrange = f"{secstart} {secend}"
-                if args.numsections == 1:
-                    outputname = f"{os.path.join(theoutputdir, outroot)}"
-                else:
-                    outputname = f"{os.path.join(theoutputdir, outroot)}_{sectionname}"
+                outputname = f"{os.path.join(theoutputdir, outroot)}"
+
                 dothis = False
                 if args.existcheck:
                     if os.path.isfile(outputname + "_DONE.txt"):
@@ -547,10 +471,7 @@ def runretroglms_workflow():
                 else:
                     dothis = True
 
-                if args.numsections == 1:
-                    thiscommand = thecommand + [f"--simcalcrange {simcalcstart} -1", outputname]
-                else:
-                    thiscommand = thecommand + [f"--simcalcrange {inputrange}", outputname]
+                thiscommand = thecommand
                 scriptfile, thescript = micutil.make_runscript(
                     thiscommand, timelimit=args.timelimit, mem=args.mem, ncpus=args.ncpus, debug=args.debug
                 )

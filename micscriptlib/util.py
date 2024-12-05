@@ -384,6 +384,21 @@ def parseconnectomename(thefile, volumeproc=True, debug=False):
         print(f"{pedir=}")
     return absname, thesubj, therun, pedir, theMNINonLinDir
 
+def parseconnectomerapidtidename(thefile, debug=False):
+    therundir, therootname = os.path.split(os.path.abspath(thefile))
+    theresultsdir, therun = os.path.split(therundir)
+    splitname = therootname.split("_")
+    thesubj = splitname[0]
+    therun = splitname[1] + "_" + splitname[2]
+    pedir = splitname[3]
+    if debug:
+        print(f"{therundir=}")
+        print(f"{therootname=}")
+        print(f"{theresultsdir=}")
+        print(f"{thesubj=}")
+        print(f"{therun=}")
+        print(f"{pedir=}")
+    return therootname, thesubj, therun, pedir
 
 def parsecolename(thefile, volumeproc=True):
     absname = os.path.abspath(thefile)
@@ -394,6 +409,22 @@ def parsecolename(thefile, volumeproc=True):
     pedir = theparts[-1][0:2]
     return absname, thesubj, therun, pedir
 
+def findHCPYAsourcefile(theroot, thesubj, therun, pedir, usefixforglm=False, debug=False):
+    thename = os.path.join(
+        theroot,
+        thesubj,
+        "preproc",
+        thesubj,
+        "MNINonLinear",
+        "Results",
+        f"{therun}_{pedir}",
+        f"{therun}_{pedir}.nii.gz",
+    )
+    if usefixforglm:
+        thename = thename.replace(".nii.gz", "_hp2000_clean.nii.gz").replace("preproc", "fixextended")
+    if debug:
+        print(f"{thename=}")
+    return thename
 
 def findboldfiles_HCPYA(theroot, thetype, volumeproc, usefixforglm, inputlistfile=None, debug=False):
     # special options depending on whether using volume or grayordinate files
@@ -439,6 +470,40 @@ def findboldfiles_HCPYA(theroot, thetype, volumeproc, usefixforglm, inputlistfil
                 print("searchstring:", searchstring)
             retlist.append(glob.glob(searchstring))
         return [val for sublist in retlist for val in sublist]
+
+def findrapidtideruns_HCPYA(theroot, thetype, inputlistfile=None, debug=False):
+    # special options depending on whether using volume or grayordinate files
+    if inputlistfile is None:
+        searchstring = os.path.join(
+            theroot,
+            "*",
+            "*" + thetype + "_[LR][LR]*maxtime_map.nii.gz",
+        )
+        if debug:
+            print("searchstring:", searchstring)
+        filelist = glob.glob(searchstring)
+        for idx,file in enumerate(filelist):
+            filelist[idx] = filelist[idx].replace("_desc-maxtime_map.nii.gz","")
+        return filelist
+    else:
+        print("using subject list")
+        inputlist = readlist(inputlistfile)
+        print("subject list is ", inputlist)
+        retlist = []
+        for subject in inputlist:
+            searchstring = os.path.join(
+                theroot,
+                str(subject),
+                "*" + thetype + "_[LR][LR]*maxtime_map.nii.gz",
+            )
+            if debug:
+                print("searchstring:", searchstring)
+            retlist.append(glob.glob(searchstring))
+        filelist = [val for sublist in retlist for val in sublist]
+        for idx,file in enumerate(filelist):
+            filelist[idx] = filelist[idx].replace("_desc-maxtime_map.nii.gz","")
+        return filelist
+
 
 
 def parserecigname(thefile):
