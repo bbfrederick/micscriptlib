@@ -413,8 +413,8 @@ def runretroglms_workflow():
 
             thecommand = []
             thecommand.append(retroglmcmd)
-            thecommand.append(datafileroot)
             thecommand.append(fmrifile)
+            thecommand.append(datafileroot)
             thecommand += retroglmopts
 
             # check to see if we should override the output directory
