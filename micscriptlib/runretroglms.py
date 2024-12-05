@@ -473,7 +473,7 @@ def runretroglms_workflow():
 
                 thiscommand = thecommand
                 scriptfile, thescript = micutil.make_runscript(
-                    thiscommand, timelimit=args.timelimit, mem=args.mem, ncpus=args.ncpus, debug=args.debug
+                    thiscommand, jobname="retroglm", timelimit=args.timelimit, mem=args.mem, ncpus=args.ncpus, debug=args.debug
                 )
                 if dothis:
                     if args.doforreal:
