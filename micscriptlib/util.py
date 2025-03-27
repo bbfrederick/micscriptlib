@@ -409,7 +409,7 @@ def parsecolename(thefile, volumeproc=True):
     pedir = theparts[-1][0:2]
     return absname, thesubj, therun, pedir
 
-def findHCPYAsourcefile(theroot, thesubj, therun, pedir, usefixforglm=False, debug=False):
+def findHCPYAsourcefile(theroot, thesubj, therun, pedir, usefixforregression=False, debug=False):
     thename = os.path.join(
         theroot,
         thesubj,
@@ -420,13 +420,13 @@ def findHCPYAsourcefile(theroot, thesubj, therun, pedir, usefixforglm=False, deb
         f"{therun}_{pedir}",
         f"{therun}_{pedir}.nii.gz",
     )
-    if usefixforglm:
+    if usefixforregression:
         thename = thename.replace(".nii.gz", "_hp2000_clean.nii.gz").replace("preproc", "fixextended")
     if debug:
         print(f"{thename=}")
     return thename
 
-def findboldfiles_HCPYA(theroot, thetype, volumeproc, usefixforglm, inputlistfile=None, debug=False):
+def findboldfiles_HCPYA(theroot, thetype, volumeproc, usefixforregression, inputlistfile=None, debug=False):
     # special options depending on whether using volume or grayordinate files
     if inputlistfile is None:
         if volumeproc:
@@ -832,7 +832,7 @@ def findboldfiles_BIDS_multisession(
 
 
 def findboldfiles_cole(
-    theroot, thetype, volumeproc, usefixforglm, inputlistfile=None, debug=False
+    theroot, thetype, volumeproc, usefixforregression, inputlistfile=None, debug=False
 ):
     # special options depending on whether using volume or grayordinate files
     if inputlistfile is None:

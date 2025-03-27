@@ -149,9 +149,9 @@ def _get_parser():
         default=True,
     )
     parser.add_argument(
-        "--donotusefixforglm",
+        "--donotusefixforregression",
         action="store_false",
-        dest="usefixforglm",
+        dest="usefixforregression",
         help="regress lagged timecourses out of original rather than fix cleaned data",
         default=True,
     )
@@ -328,7 +328,7 @@ def runrapidtides_workflow():
                 inputroot,
                 thetype,
                 args.volumeproc,
-                args.usefixforglm,
+                args.usefixforregression,
                 inputlistfile=args.inputlistfile,
                 debug=args.debug,
             )
@@ -359,7 +359,7 @@ def runrapidtides_workflow():
                 inputroot,
                 thetype,
                 args.volumeproc,
-                args.usefixforglm,
+                args.usefixforregression,
                 inputlistfile=args.inputlistfile,
                 debug=args.debug,
             )
@@ -481,16 +481,16 @@ def runrapidtides_workflow():
                     thecommand.append(f"--motionfile {motionfile}")
             if args.dodesignmat and (designfile is not None) and (thetype != "resting"):
                 thecommand.append(f"--confoundfile {designfile}")
-            if args.usefixforglm and (thetype.find("REST") >= 0) and (args.sourcetype == "HCPYA"):
+            if args.usefixforregression and (thetype.find("REST") >= 0) and (args.sourcetype == "HCPYA"):
                 cleanspec = "_hp2000_clean"
-                # glmname = os.path.join(therundir, thefmrifile[:-7] + '_hp2000_clean.nii.gz')
-                glmname = os.path.join(
+                # denoisesourcename = os.path.join(therundir, thefmrifile[:-7] + '_hp2000_clean.nii.gz')
+                denoisesourcename = os.path.join(
                     therundir, thefmrifile[:-7] + "_hp2000_clean.nii.gz"
                 ).replace("preproc", "fixextended")
-                thecommand.append(f"--glmsourcefile {glmname}")
-            if args.usefixforglm and (thetype.find("rest") >= 0) and (args.sourcetype == "recig"):
-                glmname = fmrifile.replace("data.nii.gz", "data_clean.nii.gz")
-                thecommand.append(f"--glmsourcefile {glmname}")
+                thecommand.append(f"--denoisesourcefile {denoisesourcename}")
+            if args.usefixforregression and (thetype.find("rest") >= 0) and (args.sourcetype == "recig"):
+                denoisesourcename = fmrifile.replace("data.nii.gz", "data_clean.nii.gz")
+                thecommand.append(f"--denoisesourcefile {denoisesourcename}")
             if brainmask is not None:
                 thecommand.append(f"--brainmask {brainmask}")
             if grayfile is not None:

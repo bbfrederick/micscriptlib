@@ -4,7 +4,7 @@
 #       $Date: 2015/03/06 14:12:29 $
 #       $Id: preprocess_spo2.py,v 1.1 2015/03/06 14:12:29 frederic Exp $
 #
-import micscriptlib.runretroglms as runretroglms
+import micscriptlib.runretroregress as runretroregress
 
 if __name__ == "__main__":
-    runretroglms.runretroglms_workflow()
+    runretroregress.runretroregress_workflow()

@@ -30,12 +30,12 @@ modules_list = [
     "micscriptlib/util",
     "micscriptlib/workflows/extractgms",
     "micscriptlib/workflows/runrapidtides",
-    "micscriptlib/workflows/runretroglms",
+    "micscriptlib/workflows/runretroregress",
 ]
 
 script_list = [
     "micscriptlib/scripts/runrapidtides_launcher",
-    "micscriptlib/scripts/runretroglms_launcher",
+    "micscriptlib/scripts/runretroregress_launcher",
     "micscriptlib/scripts/extractgms_launcher",
 ]
 

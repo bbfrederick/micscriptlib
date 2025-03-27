@@ -24,8 +24,8 @@ DEFAULT_MEM = "50G"
 def _get_parser():
     # get the command line parameters
     parser = argparse.ArgumentParser(
-        prog="runretroglms",
-        description="runs retroglm on existing rapidtide analyses",
+        prog="runretroregress",
+        description="runs retroregress on existing rapidtide analyses",
         usage="%(prog)s",
     )
     parser.add_argument(
@@ -66,7 +66,7 @@ def _get_parser():
         type=str,
         action="store",
         dest="extraargs",
-        help="string containing extra arguments to use to invoke retroglm",
+        help="string containing extra arguments to use to invoke retroregress",
         default=None,
     )
     parser.add_argument(
@@ -115,7 +115,7 @@ def _get_parser():
         "--noexistcheck",
         action="store_false",
         dest="existcheck",
-        help="run retroglm even if output file already exists",
+        help="run retroregress even if output file already exists",
         default=True,
     )
     parser.add_argument(
@@ -149,9 +149,9 @@ def _get_parser():
         default=True,
     )
     parser.add_argument(
-        "--donotusefixforglm",
+        "--donotusefixforregression",
         action="store_false",
-        dest="usefixforglm",
+        dest="usefixforregression",
         help="regress lagged timecourses out of original rather than fix cleaned data",
         default=True,
     )
@@ -174,7 +174,7 @@ def _get_parser():
 ##########################################################################################
 
 
-def runretroglms_workflow():
+def runretroregress_workflow():
     try:
         args = _get_parser().parse_args()
     except SystemExit:
@@ -194,7 +194,7 @@ def runretroglms_workflow():
 
     # file locations
     outputroot = f"/data/frederic/{args.sourcetype}"
-    derivativetype = "retroglm"
+    derivativetype = "retroregress"
     if args.sourcetype == "cole":
         inputroot = "/data/ckorponay/New_HCP_Cleaned_TomMethod"
         theoutputdir = os.path.join(outputroot, "derivatives", "rapidtide")
@@ -211,7 +211,7 @@ def runretroglms_workflow():
         thetypes = ["rest", "sleep"]
     elif args.sourcetype == "recig":
         inputroot = "/data/ajanes/REcig/fmri"
-        theoutputdir = os.path.join(outputroot, "derivatives", "retroglm")
+        theoutputdir = os.path.join(outputroot, "derivatives", "retroregress")
         if args.task == "rest":
             thetypes = ["resting"]
         else:
@@ -228,7 +228,7 @@ def runretroglms_workflow():
         # HCPYA
         inputroot = "/data2/HCP1200"
         procroot = args.inputdir
-        theoutputdir = os.path.join(outputroot, "derivatives", "retroglm")
+        theoutputdir = os.path.join(outputroot, "derivatives", "retroregress")
         rest1runs = ["rfMRI_REST1"]
         rest2runs = ["rfMRI_REST2"]
         emotionruns = ["tfMRI_EMOTION"]
@@ -252,8 +252,8 @@ def runretroglms_workflow():
         )'''
 
         thetypes = rest1runs + rest2runs
-    retroglmcmd = "/cm/shared/miniforge3/envs/mic/bin/retroglm"
-    retroglmcmd = "retroglm"
+    retroregresscmd = "/cm/shared/miniforge3/envs/mic/bin/retroregress"
+    retroregresscmd = "retroregress"
     SYSTYPE, SUBMITTER, SINGULARITY = micutil.getbatchinfo()
 
 
@@ -268,15 +268,15 @@ def runretroglms_workflow():
         print(f"\t{SINGULARITY=}")
 
     # make the appropriate output directory
-    retroglmopts = [
+    retroregressopts = [
         f"--nprocs {args.ncpus}",
         "--noprogressbar",
     ]
 
 
-    # put in the extra retroglm options
+    # put in the extra retroregress options
     if args.extraargs is not None:
-        retroglmopts.append(args.extraargs)
+        retroregressopts.append(args.extraargs)
 
     # set options for volume vs surface
     if args.volumeproc:
@@ -285,11 +285,11 @@ def runretroglms_workflow():
         qspec = ""
     else:
         print("setting up for grayordinate processing")
-        retroglmopts.append("-c")
+        retroregressopts.append("-c")
         outputnamesuffix = "grayordinate"
         qspec = ""
 
-    retroglmopts.append(f"--outputlevel {args.outputlevel}")
+    retroregressopts.append(f"--outputlevel {args.outputlevel}")
 
     # loop over all run types
     for thetype in thetypes:
@@ -306,7 +306,7 @@ def runretroglms_workflow():
                 inputroot,
                 thetype,
                 args.volumeproc,
-                args.usefixforglm,
+                args.usefixforregression,
                 inputlistfile=args.inputlistfile,
                 debug=args.debug,
             )
@@ -408,14 +408,14 @@ def runretroglms_workflow():
                 )
                 thesess = None
 
-            fmrifile = micutil.findHCPYAsourcefile(inputroot, thesubj, therun, pedir, usefixforglm=args.usefixforglm, debug=args.debug)
+            fmrifile = micutil.findHCPYAsourcefile(inputroot, thesubj, therun, pedir, usefixforregression=args.usefixforregression, debug=args.debug)
             print(f"{fmrifile=}")
 
             thecommand = []
-            thecommand.append(retroglmcmd)
+            thecommand.append(retroregresscmd)
             thecommand.append(fmrifile)
             thecommand.append(datafileroot)
-            thecommand += retroglmopts
+            thecommand += retroregressopts
 
             # check to see if we should override the output directory
             if args.alternateoutputdir is not None:
@@ -469,7 +469,7 @@ def runretroglms_workflow():
 
                 thiscommand = thecommand
                 scriptfile, thescript = micutil.make_runscript(
-                    thiscommand, jobname="retroglm", timelimit=args.timelimit, mem=args.mem, ncpus=args.ncpus, debug=args.debug
+                    thiscommand, jobname="retroregress", timelimit=args.timelimit, mem=args.mem, ncpus=args.ncpus, debug=args.debug
                 )
                 if dothis:
                     if args.doforreal:
@@ -483,4 +483,4 @@ def runretroglms_workflow():
 
 
 if __name__ == "__main__":
-    runretroglms_workflow()
+    runretroregress_workflow()
