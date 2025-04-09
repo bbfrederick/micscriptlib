@@ -309,8 +309,7 @@ def extractgms_workflow():
 
             # add the atlas name, if applicable
             if args.atlas is not None:
-                thecommand.append("--label")
-                thecommand.append(args.atlas)
+                thecommand.append(f"--label={args.atlas}")
                 fulloutputname = f"{os.path.join(theoutputdir, outroot)}_regiontcs.txt"
             else:
                 fulloutputname = f"{os.path.join(theoutputdir, outroot)}_GMS.txt"
