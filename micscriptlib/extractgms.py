@@ -61,6 +61,14 @@ def _get_parser():
         default=DEFAULT_SOURCETYPE,
     )
     parser.add_argument(
+        "--atlas",
+        dest="atlas",
+        action="store",
+        type=str,
+        help=f"Atlas of regions over which to average. (Default is None)",
+        default=None,
+    )
+    parser.add_argument(
         "--inputlist",
         metavar="INPUTLIST",
         type=str,
@@ -266,6 +274,11 @@ def extractgms_workflow():
             # add the mask line
             thecommand.append("-m")
             thecommand.append(maskname)
+
+            # add the atlas name, if applicable
+            if args.atlas is not None:
+                thecommand.append("--label")
+                thecommand.append(args.atlas)
 
             fulloutputname = f"{os.path.join(theoutputdir, outroot)}_GMS.txt"
             dothis = False
