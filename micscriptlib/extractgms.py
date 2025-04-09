@@ -56,7 +56,7 @@ def _get_parser():
         dest="sourcetype",
         action="store",
         type=str,
-        choices=["HCPYA", "cole", "recig", "psusleep"],
+        choices=["HCPYA", "HCPYA_rt", "cole", "recig", "psusleep"],
         help=f"Dataset (default is {DEFAULT_SOURCETYPE})",
         default=DEFAULT_SOURCETYPE,
     )
@@ -66,6 +66,14 @@ def _get_parser():
         action="store",
         type=str,
         help=f"Atlas of regions over which to average. (Default is None)",
+        default=None,
+    )
+    parser.add_argument(
+        "--derivlabel",
+        dest="derivlabel",
+        action="store",
+        type=str,
+        help=f"Alternate label for the deriviative directory.  (Default is None)",
         default=None,
     )
     parser.add_argument(
@@ -137,21 +145,29 @@ def extractgms_workflow():
 
     # file locations
     outputroot = f"/data/frederic/{args.sourcetype}/derivatives"
+    if args.derivlabel is not None:
+        derivlabel = args.derivlabel
+    else:
+        derivlabel = "gms"
     if args.sourcetype == "cole":
         inputroot = "/data/ckorponay/New_HCP_Cleaned_TomMethod"
-        theoutputdir = os.path.join(outputroot, "gms")
+        theoutputdir = os.path.join(outputroot, derivlabel)
         thetypes = ["REST1", "REST2"]
     elif args.sourcetype == "psusleep":
         inputroot = "/data/ckorponay/Sleep/fmriprep"
-        theoutputdir = os.path.join(outputroot, "gms")
+        theoutputdir = os.path.join(outputroot, derivlabel)
         thetypes = ["rest", "sleep"]
     elif args.sourcetype == "recig":
         inputroot = "/data/ajanes/REcig/fmri"
-        theoutputdir = os.path.join(outputroot, "gms")
+        theoutputdir = os.path.join(outputroot, derivlabel)
         thetypes = ["cue1", "cue2", "cue3", "cue4", "cue5", "cue6", "resting"]
+    elif args.sourcetype == "HCPYA_rt":
+        inputroot = "/data/frederic/connectome/reanalysis/derivatives/rapidtide_5p0"
+        theoutputdir = os.path.join(outputroot, derivlabel)
+        thetypes = ["REST1", "REST2"]
     else:
         inputroot = "/data2/HCP1200"
-        theoutputdir = os.path.join(outputroot, "gms")
+        theoutputdir = os.path.join(outputroot, derivlabel)
         thetypes = ["REST1", "REST2"]
 
     SYSTYPE, SUBMITTER, SINGULARITY = micutil.getbatchinfo()
@@ -197,6 +213,13 @@ def extractgms_workflow():
                 altpath=True,
                 debug=args.debug,
             )
+        elif args.sourcetype == "HCPYA_rt":
+            theboldfiles = micutil.findrapidtideruns_HCPYA(
+                inputroot,
+                thetype,
+                inputlistfile=args.inputlistfile,
+                debug=args.debug,
+            )
         else:
             theboldfiles = micutil.findboldfiles_HCPYA(
                 inputroot,
@@ -217,6 +240,14 @@ def extractgms_workflow():
                     thefile, volumeproc=True
                 )
                 maskname = os.path.join(therundir, "brainmask_fs.2.nii.gz")
+            elif args.sourcetype == "HCPYA_rt":
+                therootname, thesubj, therun, pedir = micutil.parseconnectomerapidtidename(
+                    thefile, volumeproc=True, debug=args.debug
+                )
+                absname = therootname + "_desc-lfofilterCleaned_bold.nii.gz"
+                outroot = os.path.join(thesubj, thesubj + "_" + thetype + "_" + pedir)
+                maskname = therootname + "_desc-corrfit_mask.nii.gz"
+                #maskname = os.path.join(therundir, "brainmask_fs.2.nii.gz")
             elif args.sourcetype == "HCPYA":
                 absname, thesubj, therun, pedir, MNIDir = micutil.parseconnectomename(
                     thefile, volumeproc=True, debug=args.debug
