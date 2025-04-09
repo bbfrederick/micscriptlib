@@ -504,7 +504,10 @@ def findrapidtideruns_HCPYA(theroot, thetype, findfiltered=False, inputlistfile=
             retlist.append(glob.glob(searchstring))
         filelist = [val for sublist in retlist for val in sublist]
         for idx,file in enumerate(filelist):
-            filelist[idx] = filelist[idx].replace("_desc-maxtime_map.nii.gz","")
+            if findfiltered:
+                filelist[idx] = filelist[idx].replace("_desc-maxtime_map.nii.gz", "_desc-lfofilterCleaned_bold.nii.gz")
+            else:
+                filelist[idx] = filelist[idx].replace("_desc-maxtime_map.nii.gz","")
         return filelist
 
 
