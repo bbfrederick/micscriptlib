@@ -217,6 +217,7 @@ def extractgms_workflow():
             theboldfiles = micutil.findrapidtideruns_HCPYA(
                 inputroot,
                 thetype,
+                findfiltered=True,
                 inputlistfile=args.inputlistfile,
                 debug=args.debug,
             )
