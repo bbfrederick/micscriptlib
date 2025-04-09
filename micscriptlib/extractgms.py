@@ -310,8 +310,10 @@ def extractgms_workflow():
             if args.atlas is not None:
                 thecommand.append("--label")
                 thecommand.append(args.atlas)
+                fulloutputname = f"{os.path.join(theoutputdir, outroot)}_regiontcs.txt"
+            else:
+                fulloutputname = f"{os.path.join(theoutputdir, outroot)}_GMS.txt"
 
-            fulloutputname = f"{os.path.join(theoutputdir, outroot)}_GMS.txt"
             dothis = False
             if args.existcheck:
                 if os.path.isfile(fulloutputname):

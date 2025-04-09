@@ -471,7 +471,7 @@ def findboldfiles_HCPYA(theroot, thetype, volumeproc, usefixforregression, input
             retlist.append(glob.glob(searchstring))
         return [val for sublist in retlist for val in sublist]
 
-def findrapidtideruns_HCPYA(theroot, thetype, inputlistfile=None, debug=False):
+def findrapidtideruns_HCPYA(theroot, thetype, findfiltered=False, inputlistfile=None, debug=False):
     # special options depending on whether using volume or grayordinate files
     if inputlistfile is None:
         searchstring = os.path.join(
@@ -483,7 +483,10 @@ def findrapidtideruns_HCPYA(theroot, thetype, inputlistfile=None, debug=False):
             print("searchstring:", searchstring)
         filelist = glob.glob(searchstring)
         for idx,file in enumerate(filelist):
-            filelist[idx] = filelist[idx].replace("_desc-maxtime_map.nii.gz","")
+            if findfiltered:
+                filelist[idx] = filelist[idx].replace("_desc-maxtime_map.nii.gz", "_desc-lfofilterCleaned_bold.nii.gz")
+            else:
+                filelist[idx] = filelist[idx].replace("_desc-maxtime_map.nii.gz","")
         return filelist
     else:
         print("using subject list")
