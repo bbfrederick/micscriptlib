@@ -245,10 +245,8 @@ def extractgms_workflow():
                 therootname, thesubj, therun, pedir = micutil.parseconnectomerapidtidename(
                     thefile, debug=args.debug
                 )
-                absname = therootname + "_desc-lfofilterCleaned_bold.nii.gz"
                 outroot = os.path.join(thesubj, thesubj + "_" + thetype + "_" + pedir)
                 maskname = therootname + "_desc-corrfit_mask.nii.gz"
-                #maskname = os.path.join(therundir, "brainmask_fs.2.nii.gz")
             elif args.sourcetype == "HCPYA":
                 absname, thesubj, therun, pedir, MNIDir = micutil.parseconnectomename(
                     thefile, volumeproc=True, debug=args.debug
