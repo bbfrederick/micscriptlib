@@ -386,6 +386,7 @@ def parseconnectomename(thefile, volumeproc=True, debug=False):
 
 def parseconnectomerapidtidename(thefile, debug=False):
     therundir, therootname = os.path.split(os.path.abspath(thefile))
+    therootname.replace("_desc-lfofilterCleaned_bold.nii.gz", "")
     theresultsdir, therun = os.path.split(therundir)
     splitname = therootname.split("_")
     thesubj = splitname[0]
