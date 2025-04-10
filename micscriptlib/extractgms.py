@@ -246,7 +246,7 @@ def extractgms_workflow():
                     thefile, debug=args.debug
                 )
                 outroot = os.path.join(thesubj, thesubj + "_" + thetype + "_" + pedir)
-                maskname = therootname + "_desc-corrfit_mask.nii.gz"
+                maskname = thefile.replace("_desc-lfofilterCleaned_bold.nii.gz", "_desc-corrfit_mask.nii.gz")
             elif args.sourcetype == "HCPYA":
                 absname, thesubj, therun, pedir, MNIDir = micutil.parseconnectomename(
                     thefile, volumeproc=True, debug=args.debug
