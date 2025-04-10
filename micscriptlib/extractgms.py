@@ -168,8 +168,9 @@ def extractgms_workflow():
         thetypes = ["REST1", "REST2"]
     else:
         inputroot = "/data2/HCP1200"
+        outputroot = f"/data/frederic/connectome/reanalysis/derivatives"
         theoutputdir = os.path.join(outputroot, derivlabel)
-        thetypes = ["REST1", "REST2"]
+        thetypes = ["rfMRI_REST1", "rfMRI_REST2"]
 
     SYSTYPE, SUBMITTER, SINGULARITY = micutil.getbatchinfo()
 
