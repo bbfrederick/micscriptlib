@@ -399,7 +399,7 @@ def parseconnectomerapidtidename(thefile, debug=False):
         print(f"{thesubj=}")
         print(f"{therun=}")
         print(f"{pedir=}")
-    return therootname, thesubj, therun, pedir
+    return os.path.join(therundir,therootname), thesubj, therun, pedir
 
 def parsecolename(thefile, volumeproc=True):
     absname = os.path.abspath(thefile)
