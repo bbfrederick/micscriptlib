@@ -253,6 +253,7 @@ def extractgms_workflow():
                 absname, thesubj, therun, pedir, MNIDir = micutil.parseconnectomename(
                     thefile, volumeproc=True, debug=args.debug
                 )
+                therundir, thefmrifile = os.path.split(absname)
                 outroot = os.path.join(thesubj, thesubj + "_" + thetype + "_" + pedir)
                 maskname = os.path.join(therundir, "brainmask_fs.2.nii.gz")
             elif args.sourcetype == "psusleep":
