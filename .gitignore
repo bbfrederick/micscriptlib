@@ -2,6 +2,9 @@
 */.DS_Store
 *.swp
 
+.idea
+.idea/*
+
 build
 dist
 *.egg-info
