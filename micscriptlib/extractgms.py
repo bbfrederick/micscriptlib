@@ -162,7 +162,8 @@ def extractgms_workflow():
         theoutputdir = os.path.join(outputroot, derivlabel)
         thetypes = ["cue1", "cue2", "cue3", "cue4", "cue5", "cue6", "resting"]
     elif args.sourcetype == "HCPYA_rt":
-        inputroot = "/data/frederic/connectome/reanalysis/derivatives/rapidtide_5p0"
+        outputroot = "/data/frederic/connectome/reanalysis/derivatives"
+        inputroot = os.path.join(outputroot, "rapidtide_5p0")
         theoutputdir = os.path.join(outputroot, derivlabel)
         thetypes = ["REST1", "REST2"]
     else:
