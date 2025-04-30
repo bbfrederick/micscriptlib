@@ -368,6 +368,10 @@ def runrapidtides_workflow():
             print("cannot initialize output root directory, exiting")
             sys.exit(1)
 
+        brainmask = None
+        grayfile = None
+        whitefile = None
+        csffile = None
         for thefile in theboldfiles:
             if args.sourcetype == "cole":
                 absname, thesubj, therun, pedir = micutil.parsecolename(
