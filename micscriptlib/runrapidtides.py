@@ -455,6 +455,7 @@ def runrapidtides_workflow():
                 SegDir = "/data/frederic/connectome/reanalysis/derivatives/segmentations"
                 grayfile = os.path.join(SegDir, f"{thesubj}_resampled_wmparc.nii.gz:APARC_GRAY")
                 whitefile = os.path.join(SegDir, f"{thesubj}_resampled_wmparc.nii.gz:APARC_WHITE")
+                csffile = os.path.join(SegDir, f"{thesubj}_resampled_wmparc.nii.gz:APARC_CSF")
                 thesess = None
             absname = os.path.abspath(thefile)
             therundir, thefmrifile = os.path.split(absname)
@@ -497,6 +498,8 @@ def runrapidtides_workflow():
                 thecommand.append(f"--graymattermask {grayfile}")
             if whitefile is not None:
                 thecommand.append(f"--whitemattermask {whitefile}")
+            if csffile is not None:
+                thecommand.append(f"--csfmask {csffile}")
 
 
             # before submitting the job, check to see if output file exists
