@@ -478,32 +478,33 @@ def runrapidtides_workflow():
             thecommand.append(rapidtidecmd)
             thecommand.append(fmrifile)
 
+            extraopts = []
             if args.domotion and motionfile is not None:
                 if args.sourcetype == "recig":
                     if thetype == "resting":
-                        rapidtideopts.append(f"--motionfile {motionfile}")
+                        extraopts.append(f"--motionfile {motionfile}")
                 else:
-                    rapidtideopts.append(f"--motionfile {motionfile}")
+                    extraopts.append(f"--motionfile {motionfile}")
             if args.dodesignmat and (designfile is not None) and (thetype != "resting"):
-                rapidtideopts.append(f"--confoundfile {designfile}")
+                extraopts.append(f"--confoundfile {designfile}")
             if args.usefixforregression and (thetype.find("REST") >= 0) and (args.sourcetype == "HCPYA"):
                 cleanspec = "_hp2000_clean"
                 # denoisesourcename = os.path.join(therundir, thefmrifile[:-7] + '_hp2000_clean.nii.gz')
                 denoisesourcename = os.path.join(
                     therundir, thefmrifile[:-7] + "_hp2000_clean.nii.gz"
                 ).replace("preproc", "fixextended")
-                rapidtideopts.append(f"--denoisesourcefile {denoisesourcename}")
+                extraopts.append(f"--denoisesourcefile {denoisesourcename}")
             if args.usefixforregression and (thetype.find("rest") >= 0) and (args.sourcetype == "recig"):
                 denoisesourcename = fmrifile.replace("data.nii.gz", "data_clean.nii.gz")
-                rapidtideopts.append(f"--denoisesourcefile {denoisesourcename}")
+                extraopts.append(f"--denoisesourcefile {denoisesourcename}")
             if brainmask is not None:
-                rapidtideopts.append(f"--brainmask {brainmask}")
+                extraopts.append(f"--brainmask {brainmask}")
             if grayfile is not None:
-                rapidtideopts.append(f"--graymattermask {grayfile}")
+                extraopts.append(f"--graymattermask {grayfile}")
             if whitefile is not None:
-                rapidtideopts.append(f"--whitemattermask {whitefile}")
+                extraopts.append(f"--whitemattermask {whitefile}")
             if csffile is not None:
-                rapidtideopts.append(f"--csfmask {csffile}")
+                extraopts.append(f"--csfmask {csffile}")
 
 
             # before submitting the job, check to see if output file exists
@@ -555,9 +556,9 @@ def runrapidtides_workflow():
                     dothis = True
 
                 if args.numsections == 1:
-                    thiscommand = thecommand + [outputname] + rapidtideopts + [f"--simcalcrange {simcalcstart} -1"]
+                    thiscommand = thecommand + [outputname] + rapidtideopts + extraopts + [f"--simcalcrange {simcalcstart} -1"]
                 else:
-                    thiscommand = thecommand+ [outputname] + rapidtideopts + [f"--simcalcrange {inputrange}"]
+                    thiscommand = thecommand + [outputname] + rapidtideopts + extraopts + [f"--simcalcrange {inputrange}"]
                 scriptfile, thescript = micutil.make_runscript(
                     thiscommand, timelimit=args.timelimit, mem=args.mem, ncpus=args.ncpus, debug=args.debug
                 )
