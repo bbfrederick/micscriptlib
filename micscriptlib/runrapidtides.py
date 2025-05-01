@@ -555,9 +555,9 @@ def runrapidtides_workflow():
                     dothis = True
 
                 if args.numsections == 1:
-                    thiscommand = thecommand.append(outputname) + rapidtideopts+ [f"--simcalcrange {simcalcstart} -1"]
+                    thiscommand = thecommand + [outputname] + rapidtideopts + [f"--simcalcrange {simcalcstart} -1"]
                 else:
-                    thiscommand = thecommand.append(outputname) + rapidtideopts + [f"--simcalcrange {inputrange}"]
+                    thiscommand = thecommand+ [outputname] + rapidtideopts + [f"--simcalcrange {inputrange}"]
                 scriptfile, thescript = micutil.make_runscript(
                     thiscommand, timelimit=args.timelimit, mem=args.mem, ncpus=args.ncpus, debug=args.debug
                 )
