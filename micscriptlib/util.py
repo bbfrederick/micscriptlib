@@ -520,9 +520,9 @@ def parserecigname(thefile):
     theparts = therunkey.split("_")
     thesubj = theparts[0]
     thetask = theparts[1]
-    theses = (theparts[2].split("."))[0]
+    thesesssion = (theparts[2].split("."))[0]
 
-    return absname, thefilename, thesubj, theses, thetask
+    return absname, thefilename, thesubj, thesesssion, thetask
 
 
 def parsebidsname(thefile):
@@ -544,9 +544,9 @@ def parsebidsname(thefile):
     except KeyError:
         thetask = None
     try:
-        theses = nameparts["ses"]
+        thesession = nameparts["ses"]
     except KeyError:
-        theses = None
+        thesession = None
     try:
         therun = nameparts["run"]
     except KeyError:
@@ -560,7 +560,7 @@ def parsebidsname(thefile):
     except KeyError:
         thespace = None
 
-    return absname, thefilename, thesubj, theses, therun, pedir, thetask, thespace
+    return absname, thefilename, thesubj, thesession, therun, pedir, thetask, thespace
 
 
 def files_psusleep(
