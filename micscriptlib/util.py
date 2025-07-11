@@ -20,8 +20,9 @@ if fsldir is not None:
 else:
     fslexists = False
 
-freesurferpath = os.path.join(os.environ.get("FREESURFER_HOME"), "bin")
+freesurferpath = os.environ.get("FREESURFER_HOME")
 if freesurferpath is not None:
+    freesurferpath = os.path.join(os.environ.get("FREESURFER_HOME"), "bin")
     freesurferexists = True
 else:
     freesurferexists = False
