@@ -1,7 +1,7 @@
 #!/bin/bash
 
 git pull
-cleandirs
+./cleandirs
 mkdir -p build/lib/micscriptlib
 touch build/lib/micscriptlib/_version.py
 pip install -e .
