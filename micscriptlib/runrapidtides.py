@@ -78,6 +78,14 @@ def _get_parser():
         default=DEFAULT_NCPUS,
     )
     parser.add_argument(
+        "--simcalcskip",
+        metavar="NUMSKIP",
+        type=int,
+        action="store",
+        help=f"number of TRs to skip at beginning of time course when calculating similarity (default is 100)",
+        default=None,
+    )
+    parser.add_argument(
         "--timelimit",
         metavar="TIME",
         type=str,
@@ -546,7 +554,10 @@ def runrapidtides_workflow():
             else:
                 endpoint = 100
                 thetr = 3.0
-            simcalcstart = int(round(100 * (0.72 / thetr), 0))
+            if args.simcalcskip is None:
+                simcalcstart = int(round(100 * (0.72 / thetr), 0))
+            else:
+                simcalcstart = args.simcalcskip
             numpoints = endpoint - args.startpoint + 1
             pointspersection = numpoints // args.numsections
             print(
