@@ -251,20 +251,37 @@ def runrapidtides_workflow():
         relationalruns = ["tfMRI_RELATIONAL"]
         socialruns = ["tfMRI_SOCIAL"]
         wmruns = ["tfMRI_WM"]
+        if args.task == "rest":
+            thetypes = rest1runs + rest2runs
+        elif args.task == "motor":
+            thetypes = motorruns
+        elif args.task == "emotion":
+            thetypes = emotionruns
+        elif args.task == "language":
+            thetypes = languageruns
+        elif args.task == "gambling":
+            thetypes = gamblingruns
+        elif args.task == "social":
+            thetypes = socialruns
+        elif args.task == "wm":
+            thetypes = wmruns
+        elif args.task == "relational":
+            thetypes = relationalruns
+        elif args.task == "all":
+            thetypes = (
+                emotionruns
+                + gamblingruns
+                + languageruns
+                + motorruns
+                + relationalruns
+                + socialruns
+                + wmruns
+                + rest1runs
+                + rest2runs
+            )
+        else:
+            thetypes = rest1runs + rest2runs
 
-        '''thetypes = (
-            emotionruns
-            + gamblingruns
-            + languageruns
-            + motorruns
-            + relationalruns
-            + socialruns
-            + wmruns
-            + rest1runs
-            + rest2runs
-        )'''
-
-        thetypes = rest1runs + rest2runs
     rapidtidecmd = "/cm/shared/miniforge3/envs/mic/bin/rapidtide"
     SYSTYPE, SUBMITTER, SINGULARITY = micutil.getbatchinfo()
 
