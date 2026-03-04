@@ -68,6 +68,11 @@ def make_runscript(thecommand, jobname="rapidtide", ncpus=8, timelimit="0:02:00"
     pre += ["#SBATCH --mail-type=FAIL # notifications for job fail"]
     pre += ["#SBATCH --mail-user=bbfrederick@mclean.harvard.edu"]
 
+    pre += ["export OMP_NUM_THREADS=1"]
+    pre += ["export OPENBLAS_NUM_THREADS=1"]
+    pre += ["export MKL_NUM_THREADS=1"]
+    pre += ["export NUMEXPR_NUM_THREADS=1"]
+
     if debug:
         print(f"thecommand: {thecommand}")
     script = "\n".join(pre) + "\n" + " \\\n    ".join(thecommand) + "\n"
